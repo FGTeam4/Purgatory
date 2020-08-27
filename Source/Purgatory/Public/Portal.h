@@ -1,9 +1,10 @@
+// Fill out your copyright notice in the Description page of Project Settings.
+
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
-#include "Components/StaticMeshComponent.h"
 #include <Runtime\Engine\Classes\Engine\TriggerBox.h>
 #include "Purgatory\PurgatoryCharacter.h"
 #include "Portal.generated.h"
@@ -20,13 +21,12 @@ public:
 public:
 	ATriggerBox* PortalTrigger;
 	USceneComponent* PortalRootComponent;
-	UStaticMeshComponent* PortalRenderComponent;
 
 private:
+
 	FVector LastPosition;
 	bool bLastInFront;
 	FVector TargetTeleportLocation;
-
 protected:
 	virtual void BeginPlay() override;
 
@@ -65,6 +65,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsActive = true;
 
+	UPROPERTY(EditAnywhere, Category = "Portal")
 		ACharacter* player;
 private:
 
