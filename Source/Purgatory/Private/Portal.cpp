@@ -18,7 +18,6 @@ APortal::APortal()
 	PortalRootComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	PortalRootComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
 	PortalRootComponent->Mobility = EComponentMobility::Movable;
-
 }
 
 // Called when the game starts or when spawned
