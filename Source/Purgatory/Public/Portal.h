@@ -13,39 +13,66 @@ class PURGATORY_API APortal : public AActor
 {
 	GENERATED_BODY()
 
-	
-public:	
+
+public:
 	APortal();
 
 public:
 	ATriggerBox* PortalTrigger;
+	USceneComponent* PortalRootComponent;
 
 private:
 
 	FVector LastPosition;
-	bool LastInFront;
+	bool bLastInFront;
 protected:
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UFUNCTION(BlueprintPure, Category = "Portal")
+		AActor* GetTarget();
+
+	UFUNCTION(BlueprintCallable, Category = "Portal")
+		void SetTarget(AActor* NewTarget);
 
 	bool IsActive();
 
 	void SetActive(bool NewActive);
 
-	void TeleportPlayer();
-	
+	UFUNCTION(BlueprintCallable)
+		void TeleportPlayer();
+
 	bool IsPlayerInFrontOfPortal(FVector point, FVector PortalLocation, FVector PortalNormal);
 
 	bool IsPlayerCrossingPortal(FVector Point, FVector PortalLocaion, FVector PortalNormal);
 
+	/* Render texture functions */
+	UFUNCTION(BlueprintImplementableEvent, Category = "Portal")
+		void ClearRTT();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Portal")
+		void SetRTT(UTexture* RenderTexture);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Portal")
+		void ForceTick();
+
 public:
-	bool bIsActive = true;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bIsActive = true;
 
 	//Linked point of the portal
-	AActor* target;
+	UPROPERTY(EditAnywhere, Category = "Portal")
+		AActor* TargetObject;
 
-	APurgatoryCharacter* player;
+	UPROPERTY(EditAnywhere, Category = "Portal")
+		APurgatoryCharacter* player;
+
+public:
+	/* PURELY HELPER FUNCTIONS */
+	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
+	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);
 };
+
