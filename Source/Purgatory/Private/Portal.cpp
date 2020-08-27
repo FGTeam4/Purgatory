@@ -26,13 +26,16 @@ void APortal::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (player == nullptr)
+	{
+		player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	}
 }
 
 // Called every frame
 void APortal::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 AActor* APortal::GetTarget()
@@ -57,10 +60,14 @@ void APortal::SetActive(bool NewActive)
 
 void APortal::TeleportPlayer()
 {
-	if (bIsActive)
+	if (player == nullptr)
 	{
-		//Temp teleport function, will be extended heavily later.
-		player->SetActorLocation(TargetObject->GetActorLocation());
+		player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	}
+
+	if (bIsActive && TargetObject != nullptr)
+	{
+		player->SetActorLocation(GetTarget()->GetActorLocation());
 	}
 }
 

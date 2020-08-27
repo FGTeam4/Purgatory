@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Kismet/GameplayStatics.h"
 #include <Runtime\Engine\Classes\Engine\TriggerBox.h>
 #include "Purgatory\PurgatoryCharacter.h"
 #include "Portal.generated.h"
@@ -25,6 +26,7 @@ private:
 
 	FVector LastPosition;
 	bool bLastInFront;
+	FVector TargetTeleportLocation;
 protected:
 	virtual void BeginPlay() override;
 
@@ -63,12 +65,11 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bIsActive = true;
 
-	//Linked point of the portal
-	UPROPERTY(EditAnywhere, Category = "Portal")
-		AActor* TargetObject;
-
 	UPROPERTY(EditAnywhere, Category = "Portal")
 		ACharacter* player;
+private:
+
+	AActor* TargetObject = nullptr;
 
 public:
 	/* PURELY HELPER FUNCTIONS */
