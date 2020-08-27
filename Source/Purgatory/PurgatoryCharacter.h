@@ -56,6 +56,16 @@ protected:
 	virtual void BeginPlay();
 
 public:
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRestrictMovement = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bRestrictYaw = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float YawConstraint = 90.0f;
+
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseTurnRate;
@@ -95,8 +105,16 @@ protected:
 	/** Handles moving forward/backward */
 	void MoveForward(float Val);
 
-	/** Handles stafing movement, left and right */
+	/** Handles strafing movement, left and right */
 	void MoveRight(float Val);
+
+	/**
+	 * Add input (affecting Yaw) to the Controller's ControlRotation, if it is a local PlayerController.
+	 * This value is multiplied by the PlayerController's InputYawScale value.
+	 * @param Val Amount to add to Yaw. This value is multiplied by the PlayerController's InputYawScale value.
+	 * @see PlayerController::InputYawScale
+	 */
+	void AddControllerYawInput(float Val);
 
 	/**
 	 * Called via input to turn at a given rate.
