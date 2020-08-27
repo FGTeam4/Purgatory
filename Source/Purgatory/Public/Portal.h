@@ -47,5 +47,15 @@ public:
 	//Linked point of the portal
 	AActor* target;
 
+<<<<<<< Updated upstream
 	APurgatoryCharacter* player;
+=======
+	UPROPERTY(EditAnywhere, Category = "Portal")
+		ACharacter* player;
+
+public:
+	/* PURELY HELPER FUNCTIONS */
+	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
+	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);
+>>>>>>> Stashed changes
 };
