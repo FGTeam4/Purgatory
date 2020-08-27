@@ -7,13 +7,25 @@
 APortal::APortal()
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	bIsActive = false;
+
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+	RootComponent->Mobility = EComponentMobility::Static;
+
+	PortalRootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("PortalRootComponent"));
+	PortalRootComponent->SetupAttachment(GetRootComponent());
+	PortalRootComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
+	PortalRootComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
+	PortalRootComponent->Mobility = EComponentMobility::Movable;
+
 }
 
 // Called when the game starts or when spawned
 void APortal::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 }
 
 // Called every frame
@@ -21,6 +33,16 @@ void APortal::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+AActor* APortal::GetTarget()
+{
+	return TargetObject;
+}
+
+void APortal::SetTarget(AActor* NewTarget)
+{
+	TargetObject = NewTarget;
 }
 
 bool APortal::IsActive()
@@ -35,8 +57,11 @@ void APortal::SetActive(bool NewActive)
 
 void APortal::TeleportPlayer()
 {
-	//Temp teleport function, will be extended heavily later.
-	player->SetActorLocation(target->GetActorLocation());
+	if (bIsActive)
+	{
+		//Temp teleport function, will be extended heavily later.
+		player->SetActorLocation(TargetObject->GetActorLocation());
+	}
 }
 
 bool APortal::IsPlayerInFrontOfPortal(FVector Point, FVector PortalLocation, FVector PortalNormal)
@@ -63,16 +88,55 @@ bool APortal::IsPlayerCrossingPortal(FVector Point, FVector PortalLocation, FVec
 	//Did we intersect the portal since last location
 	//If yes, check direction, crossing forward means we were in front and now the back.
 
-	if (IsIntersecting && !IsInFront && LastInFront)
+	if (IsIntersecting && !IsInFront && bLastInFront)
 	{
 		IsCrossing = true;
 	}
 
-	LastInFront = IsInFront;
+	bLastInFront = IsInFront;
 	LastPosition = Point;
 
 	return IsCrossing;
 }
 
+FVector APortal::ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target)
+{
+	if (Ref == nullptr || Target == nullptr)
+	{
+		return FVector::ZeroVector;
+	}
+
+	FVector Direction = Location - Ref->GetActorLocation();
+	FVector TargetLocation = Target->GetActorLocation();
+
+	FVector Dots;
+	Dots.X = FVector::DotProduct(Direction, Ref->GetActorForwardVector());
+	Dots.Y = FVector::DotProduct(Direction, Ref->GetActorRightVector());
+	Dots.Z = FVector::DotProduct(Direction, Ref->GetActorUpVector());
+
+	FVector NewDirection = Dots.X * Target->GetActorForwardVector()
+		+ Dots.Y * Target->GetActorRightVector()
+		+ Dots.Z * Target->GetActorUpVector();
+
+	return TargetLocation + NewDirection;
+}
+
+FRotator APortal::ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target)
+{
+	if (Ref == nullptr || Target == nullptr)
+	{
+		return FRotator::ZeroRotator;
+	}
+
+	FTransform SourceTransform = Ref->GetActorTransform();
+	FTransform TargetTransform = Target->GetActorTransform();
+
+	FQuat QuatRotation = FQuat(Rotation);
+
+	FQuat LocalQuat = SourceTransform.GetRotation().Inverse() * QuatRotation;
+	FQuat NewWorldQuat = TargetTransform.GetRotation() * LocalQuat;
+
+	return NewWorldQuat.Rotator();
+}
 
 
