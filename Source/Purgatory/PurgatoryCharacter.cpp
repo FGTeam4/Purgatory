@@ -135,7 +135,7 @@ void APurgatoryCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
+	PlayerInputComponent->BindAxis("Turn", this, &APurgatoryCharacter::AddControllerYawInput);
 	PlayerInputComponent->BindAxis("TurnRate", this, &APurgatoryCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
 	PlayerInputComponent->BindAxis("LookUpRate", this, &APurgatoryCharacter::LookUpAtRate);
@@ -259,10 +259,21 @@ void APurgatoryCharacter::EndTouch(const ETouchIndex::Type FingerIndex, const FV
 
 void APurgatoryCharacter::MoveForward(float Value)
 {
-	if (Value != 0.0f)
+	if (bRestrictMovement)
 	{
-		// add movement in that direction
-		AddMovementInput(GetActorForwardVector(), Value);
+		if (Value > 0.0f)
+		{
+			// add movement in that direction
+			AddMovementInput(GetActorForwardVector(), Value);
+		}
+	}
+	else
+	{
+		if (Value != 0.0f)
+		{
+			// add movement in that direction
+			AddMovementInput(GetActorForwardVector(), Value);
+		}
 	}
 }
 
@@ -275,10 +286,35 @@ void APurgatoryCharacter::MoveRight(float Value)
 	}
 }
 
+void APurgatoryCharacter::AddControllerYawInput(float Val)
+{
+	if (bRestrictYaw)
+	{
+		float CurrentYaw = GetActorRotation().Yaw;
+		// Restrict yaw movement for mouse
+		if ((CurrentYaw < YawConstraint || CurrentYaw > -YawConstraint) && Val != 0.f && Controller && Controller->IsLocalPlayerController())
+		{
+			APlayerController* const PC = CastChecked<APlayerController>(Controller);
+			PC->AddYawInput(Val);
+		}
+	}
+	else
+	{
+		if (Val != 0.f && Controller && Controller->IsLocalPlayerController())
+		{
+			APlayerController* const PC = CastChecked<APlayerController>(Controller);
+			PC->AddYawInput(Val);
+		}
+	}
+}
+
 void APurgatoryCharacter::TurnAtRate(float Rate)
 {
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	if(Rate != 0.0f)
+	{
+		// calculate delta for this frame from the rate information
+		AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	}
 }
 
 void APurgatoryCharacter::LookUpAtRate(float Rate)
