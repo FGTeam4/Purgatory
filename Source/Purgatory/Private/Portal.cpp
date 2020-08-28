@@ -2,6 +2,7 @@
 //Test
 
 #include "Portal.h"
+#include "PortalManager.h"
 
 // Sets default values
 APortal::APortal()
@@ -146,4 +147,44 @@ FRotator APortal::ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AA
 	return NewWorldQuat.Rotator();
 }
 
+bool APortal::IsPointInsideBox(FVector Point, UBoxComponent* Box)
+{
+	if (Box != nullptr)
+	{
+		FVector Center = Box->GetComponentLocation();
+		FVector Half = Box->GetScaledBoxExtent();
+		FVector DirectionX = Box->GetForwardVector();
+		FVector DirectionY = Box->GetRightVector();
+		FVector DirectionZ = Box->GetUpVector();
 
+		FVector Direction = Point - Center;
+
+		bool IsInside(FMath::Abs(FVector::DotProduct(Direction, DirectionX)) <= Half.X &&
+			FMath::Abs(FVector::DotProduct(Direction, DirectionY)) <= Half.Y &&
+			FMath::Abs(FVector::DotProduct(Direction, DirectionZ)) <= Half.Z);
+
+		return IsInside;
+	}
+
+	return false;
+}
+
+AActor* APortal::GetPortalManager(AActor* Context)
+{
+	if (Context != nullptr)
+	{
+		APortalManager* Manager = nullptr;
+
+		if (Context != nullptr && Context->GetWorld() != nullptr)
+		{
+			for (TObjectIterator<APortalManager> Itr; Itr; ++Itr)
+			{
+				Manager = *Itr;
+			}
+		}
+
+		return Manager;
+	}
+
+	return nullptr;
+}

@@ -124,24 +124,22 @@ void APortalManager::Update(float DeltaTime)
 	}
 }
 
-
-
 // Called when the game starts or when spawned
 void APortalManager::BeginPlay()
 {
 	Super::BeginPlay();
+	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	this->Init();
 }
 
 // Called every frame
 void APortalManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 void APortalManager::CreateRenderTarget(UTextureRenderTarget* NewRenderTarget, APortal* Portal)
 {
-
 }
 
 void APortalManager::DestroyRenderTarget(APortal* Portal)
@@ -291,4 +289,3 @@ FRotator APortalManager::ConvertRotationToActorSpace(FRotator Rotation, AActor* 
 
 	return NewWorldQuat.Rotator();
 }
-

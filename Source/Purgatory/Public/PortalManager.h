@@ -44,6 +44,7 @@ private:
 
 	APortal* UpdatePortalsInTheWorld();
 
+	UFUNCTION(BlueprintCallable)
 	void RequestTeleport(APortal* Portal, ACharacter* Player);
 
 	void GeneratePortalTexture();

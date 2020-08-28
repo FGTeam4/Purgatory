@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Engine/LocalPlayer.h"
+
 #include "Public/HoldableObject.h"
 #include "PurgatoryCharacter.generated.h"
 
@@ -53,6 +54,7 @@ class APurgatoryCharacter : public ACharacter
 public:
 	APurgatoryCharacter();
 
+	UFUNCTION(BlueprintPure)
 	UCameraComponent* GetCamera();
 
 protected:

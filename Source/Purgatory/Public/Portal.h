@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/BoxComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include <Runtime\Engine\Classes\Engine\TriggerBox.h>
 #include "Purgatory\PurgatoryCharacter.h"
@@ -20,6 +21,8 @@ public:
 
 public:
 	ATriggerBox* PortalTrigger;
+
+	UPROPERTY(BlueprintReadWrite)
 	USceneComponent* PortalRootComponent;
 
 private:
@@ -35,38 +38,41 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UFUNCTION(BlueprintPure, Category = "Portal")
-		AActor* GetTarget();
+	AActor* GetTarget();
 
 	UFUNCTION(BlueprintCallable, Category = "Portal")
-		void SetTarget(AActor* NewTarget);
+	void SetTarget(AActor* NewTarget);
 
+	UFUNCTION(BlueprintPure)
 	bool IsActive();
 
 	void SetActive(bool NewActive);
 
 	UFUNCTION(BlueprintCallable)
-		void TeleportPlayer();
+	void TeleportPlayer();
 
+	UFUNCTION(BlueprintCallable, Category = "Portal")
 	bool IsPlayerInFrontOfPortal(FVector point, FVector PortalLocation, FVector PortalNormal);
 
+	UFUNCTION(BlueprintCallable, Category = "Portal")
 	bool IsPlayerCrossingPortal(FVector Point, FVector PortalLocaion, FVector PortalNormal);
 
 	/* Render texture functions */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Portal")
-		void ClearRTT();
+	void ClearRTT();
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Portal")
-		void SetRTT(UTexture* RenderTexture);
+	void SetRTT(UTexture* RenderTexture);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Portal")
-		void ForceTick();
+	void ForceTick();
 
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-		bool bIsActive = true;
+	bool bIsActive = true;
 
 	UPROPERTY(EditAnywhere, Category = "Portal")
-		ACharacter* player;
+	ACharacter* player;
 private:
 
 	AActor* TargetObject = nullptr;
@@ -75,4 +81,10 @@ private :
 	/* PURELY HELPER FUNCTIONS */
 	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
 	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);
+
+	UFUNCTION(BlueprintCallable)
+	bool IsPointInsideBox(FVector Point, UBoxComponent* Box);
+
+	UFUNCTION(BlueprintCallable)
+	AActor* GetPortalManager(AActor* Context);
 };
