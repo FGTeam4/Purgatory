@@ -84,10 +84,26 @@ APurgatoryCharacter::APurgatoryCharacter()
 	//bUsingMotionControllers = true;
 }
 
+UCameraComponent* APurgatoryCharacter::GetCamera()
+{
+	if (FirstPersonCameraComponent != nullptr)
+	{
+		return FirstPersonCameraComponent;
+	}
+	return nullptr;
+}
+
 void APurgatoryCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
+	//class APortalManager* PortalManager;
+	//
+	//FActorSpawnParameters SpawnParameters;
+	//PortalManager = GetWorld()->SpawnActor<class APortalManager>(class APortalManager::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
+	//PortalManager->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	//
+	//PortalManager->Init();
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
@@ -336,6 +352,24 @@ bool APurgatoryCharacter::EnableTouchscreenMovement(class UInputComponent* Playe
 	}
 	
 	return false;
+}
+
+FMatrix APurgatoryCharacter::GetCameraProjectionMatrix()
+{
+	FMatrix ProjectionMatrix;
+
+	if (GetWorld()->GetFirstPlayerController()->GetLocalPlayer() != nullptr)
+	{
+		FSceneViewProjectionData PlayerProjectionData;
+
+		//Will most likely crash / throw error or just break in general but i hope it works, leaving this for future reference
+		GetWorld()->GetFirstLocalPlayerFromController()->GetProjectionData(GetWorld()->GetFirstPlayerController()->GetLocalPlayer()->ViewportClient->Viewport,
+			EStereoscopicPass::eSSP_FULL, PlayerProjectionData);
+
+		ProjectionMatrix = PlayerProjectionData.ProjectionMatrix;
+	}
+	
+	return ProjectionMatrix;
 }
 
 bool APurgatoryCharacter::TraceForObjects(FHitResult hitResult, FCollisionQueryParams params)

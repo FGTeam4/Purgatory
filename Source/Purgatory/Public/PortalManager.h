@@ -6,7 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "Purgatory/PurgatoryCharacter.h"
+#include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
+#include "Camera/CameraComponent.h"
 #include "Portal.h"
 #include "Engine/TextureRenderTarget.h"
 #include "PortalManager.generated.h"
@@ -28,6 +31,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void Init();
+
+
 private:
 	void CreateRenderTarget(UTextureRenderTarget* NewRenderTarget, APortal* Portal);
 
@@ -38,11 +44,10 @@ private:
 
 	APortal* UpdatePortalsInTheWorld();
 
-	bool RequestTeleport(APortal* Portal, ACharacter* Player);
+	void RequestTeleport(APortal* Portal, ACharacter* Player);
 
 	void GeneratePortalTexture();
 
-	void Init();
 
 	void UpdateCapture(APortal* Portal);
 
@@ -62,6 +67,13 @@ private:
 	UPROPERTY()
 	APlayerController* ControllerOwner;
 
+	UPROPERTY()
+	APurgatoryCharacter* PlayerCharacter;
+
 	int32 PreviousScreenSizeX;
 	int32 PreviousScreenSizeY;
+
+public:
+	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
+	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);
 };
