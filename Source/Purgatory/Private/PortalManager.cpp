@@ -55,6 +55,55 @@ void APortalManager::Init()
 
 void APortalManager::UpdateCapture(APortal* Portal)
 {
+	//Retrieve Reference to character and player controller (Maybe just character though?)
+	if (ControllerOwner == nullptr)
+	{
+		return;
+	}
+
+	//Update SceneCapture
+
+	if (SceneCaptureComponent != nullptr && PortalTexture != nullptr
+		&& Portal != nullptr && PlayerCharacter != nullptr)
+	{
+		UCameraComponent* PlayerCamera = PlayerCharacter->GetCamera();
+		AActor* Target = Portal->GetTarget();
+
+		if (Target != nullptr)
+		{
+			//Compute new location in the space of target actor(May not be aligned in world)
+			FVector NewLocation = ConvertLocationToActorSpace(PlayerCamera->GetComponentLocation(), Portal, Target);
+			SceneCaptureComponent->SetWorldLocation(NewLocation);
+
+			//Compute new rotation in the space of target location
+			FTransform CameraTransform = PlayerCamera->GetComponentTransform();
+			FTransform SourceTransform = Portal->GetActorTransform();
+			FTransform TargetTransform = Target->GetActorTransform();
+
+			FQuat LocalQuat = SourceTransform.GetRotation().Inverse() * CameraTransform.GetRotation();
+			FQuat NewWorldQuat = TargetTransform.GetRotation() * LocalQuat;
+
+			//Update SceneCapture Rotation
+			SceneCaptureComponent->SetWorldRotation(NewWorldQuat);
+
+			//Clip Plane to ignore objects between the scene capture and the target of the portal
+			SceneCaptureComponent->ClipPlaneNormal = Target->GetActorForwardVector();
+			SceneCaptureComponent->ClipPlaneBase = Target->GetActorLocation() + 
+				(SceneCaptureComponent->ClipPlaneNormal * -1.5f); //Offset to avoid visible pixel border
+		}
+
+		Portal->SetActive(true);
+
+		//Assign render target
+		Portal->SetRTT(PortalTexture);
+		SceneCaptureComponent->TextureTarget = PortalTexture;
+
+		//Get the projection matrix
+		SceneCaptureComponent->CustomProjectionMatrix = PlayerCharacter->GetCameraProjectionMatrix();
+
+		//Render scene from this Component for the portals
+		SceneCaptureComponent->CaptureScene();
+	}
 }
 
 void APortalManager::Update(float DeltaTime)
@@ -67,13 +116,15 @@ void APortalManager::Update(float DeltaTime)
 		GeneratePortalTexture();
 	}
 
-	//APortal* Portal = UpdatePortalsInTheWorld();
-	//
-	//if (Portal != nullptr)
-	//{
-	//	UpdateCapture(Portal);
-	//}
+	APortal* Portal = UpdatePortalsInTheWorld();
+	
+	if (Portal != nullptr)
+	{
+		UpdateCapture(Portal);
+	}
 }
+
+
 
 // Called when the game starts or when spawned
 void APortalManager::BeginPlay()
@@ -108,19 +159,46 @@ APortal* APortalManager::UpdatePortalsInTheWorld()
 
 	APortal* ActivePortal = nullptr;
 	FVector PlayerLocation = Character->GetActorLocation();
-	//FVector CameraLocation = Character->GetCameraComponent()->GetComponentLocation();
+	FVector CameraLocation = PlayerCharacter->GetCamera()->GetComponentLocation();
 	
-	return nullptr;
-}
+	float Distance = 4096.0f;
 
-bool APortalManager::RequestTeleport(APortal* Portal, ACharacter* Player)
-{
-	if (!Portal->bIsActive)
+	for (TActorIterator<APortal>ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
-		return false;
+		APortal* Portal = *ActorItr;
+		FVector PortalLocation = Portal->GetActorLocation();
+		FVector PortalNormal = -1 * Portal->GetActorForwardVector();
+
+		//Reset portal
+		Portal->ClearRTT();
+		Portal->SetActive(false);
+
+		float NewDistance = FMath::Abs(FVector::Dist(PlayerLocation, PortalLocation));
+
+		if (NewDistance < Distance)
+		{
+			Distance = NewDistance;
+			ActivePortal = Portal;
+		}
 	}
 
-	return true;
+	return ActivePortal;
+}
+
+void APortalManager::RequestTeleport(APortal* Portal, ACharacter* Player)
+{
+	if (Portal != nullptr && Player != nullptr)
+	{
+		Portal->TeleportPlayer();
+
+		APortal* FuturePortal = UpdatePortalsInTheWorld();
+
+		if (FuturePortal != nullptr)
+		{
+			FuturePortal->ForceTick();
+			UpdateCapture(FuturePortal);
+		}
+	}
 }
 
 void APortalManager::GeneratePortalTexture()
@@ -162,7 +240,7 @@ void APortalManager::GeneratePortalTexture()
 		PortalTexture->AddressX = TextureAddress::TA_Clamp;
 		PortalTexture->AddressY = TextureAddress::TA_Clamp;
 
-		//PortalTexture->nAutoGenerateMips = false;
+		//PortalTexture->bAutoGenerateMips = false;
 
 		//Force the engine to create a new render target
 		PortalTexture->UpdateResource();
@@ -172,5 +250,45 @@ void APortalManager::GeneratePortalTexture()
 	{
 		PortalTexture->ResizeTarget(CurrentSizeX, CurrentSizeY);
 	}
+}
+
+FVector APortalManager::ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target)
+{
+	if (Ref == nullptr || Target == nullptr)
+	{
+		return FVector::ZeroVector;
+	}
+
+	FVector Direction = Location - Ref->GetActorLocation();
+	FVector TargetLocation = Target->GetActorLocation();
+
+	FVector Dots;
+	Dots.X = FVector::DotProduct(Direction, Ref->GetActorForwardVector());
+	Dots.Y = FVector::DotProduct(Direction, Ref->GetActorRightVector());
+	Dots.Z = FVector::DotProduct(Direction, Ref->GetActorUpVector());
+
+	FVector NewDirection = Dots.X * Target->GetActorForwardVector()
+		+ Dots.Y * Target->GetActorRightVector()
+		+ Dots.Z * Target->GetActorUpVector();
+
+	return TargetLocation + NewDirection;
+}
+
+FRotator APortalManager::ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target)
+{
+	if (Ref == nullptr || Target == nullptr)
+	{
+		return FRotator::ZeroRotator;
+	}
+
+	FTransform SourceTransform = Ref->GetActorTransform();
+	FTransform TargetTransform = Target->GetActorTransform();
+
+	FQuat QuatRotation = FQuat(Rotation);
+
+	FQuat LocalQuat = SourceTransform.GetRotation().Inverse() * QuatRotation;
+	FQuat NewWorldQuat = TargetTransform.GetRotation() * LocalQuat;
+
+	return NewWorldQuat.Rotator();
 }
 

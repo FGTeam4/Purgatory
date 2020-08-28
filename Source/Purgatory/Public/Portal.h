@@ -71,7 +71,7 @@ private:
 
 	AActor* TargetObject = nullptr;
 
-public:
+private :
 	/* PURELY HELPER FUNCTIONS */
 	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
 	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);

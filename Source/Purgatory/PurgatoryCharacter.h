@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Engine/LocalPlayer.h"
 #include "Public/HoldableObject.h"
 #include "PurgatoryCharacter.generated.h"
 
@@ -52,6 +53,8 @@ class APurgatoryCharacter : public ACharacter
 public:
 	APurgatoryCharacter();
 
+	UCameraComponent* GetCamera();
+
 protected:
 	virtual void BeginPlay();
 
@@ -96,9 +99,6 @@ public:
 
 protected:
 	
-	/** Fires a projectile. */
-	void OnFire();
-
 	/** Resets HMD orientation and position in VR. */
 	void OnResetVR();
 
@@ -161,6 +161,7 @@ public:
 	FORCEINLINE class UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 
 public:
+	FMatrix GetCameraProjectionMatrix();
 
 	bool TraceForObjects(FHitResult hitResult, FCollisionQueryParams params);
 };	
