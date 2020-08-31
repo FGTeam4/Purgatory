@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
+#include "GameFramework/Actor.h"
 #include "Kismet/GameplayStatics.h"
 #include <Runtime\Engine\Classes\Engine\TriggerBox.h>
 #include "Purgatory\PurgatoryCharacter.h"
@@ -72,7 +73,7 @@ public:
 	bool bIsActive = true;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Portal")
-	ACharacter* player;
+	ACharacter* Player;
 private:
 
 	AActor* TargetObject = nullptr;
