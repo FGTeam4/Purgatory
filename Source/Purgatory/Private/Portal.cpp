@@ -18,7 +18,7 @@ APortal::APortal()
 	PortalRootComponent->SetupAttachment(GetRootComponent());
 	PortalRootComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	PortalRootComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	PortalRootComponent->Mobility = EComponentMobility::Movable;
+	PortalRootComponent->Mobility = EComponentMobility::Static;
 
 }
 
@@ -27,9 +27,16 @@ void APortal::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (player == nullptr)
+	if (Player == nullptr)
 	{
-		player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	}
+
+	if (TargetObject != nullptr)
+	{
+		UBoxComponent* TargetCollider = nullptr;
+		TargetCollider = TargetObject->FindComponentByClass<UBoxComponent>();
+		TargetObject->SetActorEnableCollision(false);
 	}
 }
 
@@ -63,9 +70,9 @@ void APortal::TeleportPlayer(AActor* ActorToTeleport)
 {
 	if (ActorToTeleport != nullptr)
 	{
-		if (player == nullptr)
+		if (Player == nullptr)
 		{
-			player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+			Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 		}
 
 		FVector Velocity = FVector::ZeroVector;
@@ -84,6 +91,19 @@ void APortal::TeleportPlayer(AActor* ActorToTeleport)
 
 		FRotator NewRotation = ConvertRotationToActorSpace(ActorToTeleport->GetActorRotation(), this, TargetObject);
 		ActorToTeleport->SetActorRelativeRotation(NewRotation);
+
+		FVector Dots;
+		Dots.X = FVector::DotProduct(Velocity, GetActorForwardVector());
+		Dots.Y = FVector::DotProduct(Velocity, GetActorRightVector());
+		Dots.Z = FVector::DotProduct(Velocity, GetActorUpVector());
+
+		FVector NewVelocity = Dots.X * TargetObject->GetActorForwardVector() +
+			Dots.Y * TargetObject->GetActorRightVector() +
+			Dots.Z * TargetObject->GetActorUpVector();
+
+		//Player->GetCharacterMovement()->Velocity = NewVelocity;
+
+		LastPosition = NewLocation;
 	}
 }
 
@@ -111,7 +131,12 @@ bool APortal::IsPlayerCrossingPortal(FVector Point, FVector PortalLocation, FVec
 	//Did we intersect the portal since last location
 	//If yes, check direction, crossing forward means we were in front and now the back.
 
-	if (IsIntersecting && !IsInFront && bLastInFront)
+	//if (IsIntersecting && !IsInFront && bLastInFront)
+	//{
+	//	IsCrossing = true;
+	//}
+
+	if (IsIntersecting && !IsInFront)
 	{
 		IsCrossing = true;
 	}

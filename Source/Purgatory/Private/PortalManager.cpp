@@ -15,6 +15,22 @@ APortalManager::APortalManager(const FObjectInitializer& ObjectInitializer) : Su
 	PreviousScreenSizeY = 0;
 }
 
+// Called when the game starts or when spawned
+void APortalManager::BeginPlay()
+{
+	Super::BeginPlay();
+	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
+	this->Init();
+}
+
+// Called every frame
+void APortalManager::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+	Update(DeltaTime);
+}
+
+
 void APortalManager::Init()
 {
 	SceneCaptureComponent = NewObject<USceneCaptureComponent2D>(this, USceneCaptureComponent2D::StaticClass(), *FString("PortalSceneCaptureComponent"));
@@ -122,22 +138,6 @@ void APortalManager::Update(float DeltaTime)
 	{
 		UpdateCapture(Portal);
 	}
-}
-
-// Called when the game starts or when spawned
-void APortalManager::BeginPlay()
-{
-	Super::BeginPlay();
-	//PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	this->Init();
-}
-
-// Called every frame
-void APortalManager::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	Update(DeltaTime);
 }
 
 void APortalManager::CreateRenderTarget(UTextureRenderTarget* NewRenderTarget, APortal* Portal)
