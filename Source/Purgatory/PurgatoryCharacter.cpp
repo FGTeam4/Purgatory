@@ -97,13 +97,6 @@ void APurgatoryCharacter::BeginPlay()
 {
 	// Call the base class  
 	Super::BeginPlay();
-	//class APortalManager* PortalManager;
-	//
-	//FActorSpawnParameters SpawnParameters;
-	//PortalManager = GetWorld()->SpawnActor<class APortalManager>(class APortalManager::StaticClass(), FVector::ZeroVector, FRotator::ZeroRotator, SpawnParameters);
-	//PortalManager->AttachToActor(this, FAttachmentTransformRules::SnapToTargetIncludingScale);
-	//
-	//PortalManager->Init();
 
 	//Attach gun mesh component to Skeleton, doing it here because the skeleton is not yet created in the constructor
 	FP_Gun->AttachToComponent(Mesh1P, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, true), TEXT("GripPoint"));
