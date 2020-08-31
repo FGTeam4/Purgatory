@@ -6,7 +6,7 @@
 // Sets default values
 APortalManager::APortalManager(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	PortalTexture = nullptr;
 	UpdateDelay = 1.1f;
@@ -50,13 +50,13 @@ void APortalManager::Init()
 	SceneCaptureComponent->PostProcessSettings = CaptureSettings;
 
 	//Create RTT Buffer
-	//GeneratePortalTexture();
+	GeneratePortalTexture();
 }
 
 void APortalManager::UpdateCapture(APortal* Portal)
 {
 	//Retrieve Reference to character and player controller (Maybe just character though?)
-	if (ControllerOwner == nullptr)
+	if (PlayerCharacter == nullptr)
 	{
 		return;
 	}
@@ -128,6 +128,7 @@ void APortalManager::Update(float DeltaTime)
 void APortalManager::BeginPlay()
 {
 	Super::BeginPlay();
+	//PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	this->Init();
 }
@@ -136,24 +137,28 @@ void APortalManager::BeginPlay()
 void APortalManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+	Update(DeltaTime);
 }
 
 void APortalManager::CreateRenderTarget(UTextureRenderTarget* NewRenderTarget, APortal* Portal)
 {
+	//Implementation in blueprint
 }
 
 void APortalManager::DestroyRenderTarget(APortal* Portal)
 {
+	//Implementation in blueprint
 }
 
 APortal* APortalManager::UpdatePortalsInTheWorld()
 {
-	if (ControllerOwner == nullptr)
+	if (PlayerCharacter == nullptr)
 	{
 		return nullptr;
 	}
 
-	ACharacter* Character = ControllerOwner->GetCharacter();
+	//ACharacter* Character = ControllerOwner->GetCharacter();
+	ACharacter* Character = PlayerCharacter;
 
 	APortal* ActivePortal = nullptr;
 	FVector PlayerLocation = Character->GetActorLocation();
@@ -187,7 +192,7 @@ void APortalManager::RequestTeleport(APortal* Portal, ACharacter* Player)
 {
 	if (Portal != nullptr && Player != nullptr)
 	{
-		Portal->TeleportPlayer();
+		Portal->TeleportPlayer(Player);
 
 		APortal* FuturePortal = UpdatePortalsInTheWorld();
 
