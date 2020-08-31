@@ -49,7 +49,6 @@ private:
 
 	void GeneratePortalTexture();
 
-
 	void UpdateCapture(APortal* Portal);
 
 	void Update(float DeltaTime);
