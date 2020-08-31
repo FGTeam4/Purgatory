@@ -59,16 +59,31 @@ void APortal::SetActive(bool NewActive)
 	bIsActive = NewActive;
 }
 
-void APortal::TeleportPlayer()
+void APortal::TeleportPlayer(AActor* ActorToTeleport)
 {
-	if (player == nullptr)
+	if (ActorToTeleport != nullptr)
 	{
-		player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	}
+		if (player == nullptr)
+		{
+			player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+		}
 
-	if (bIsActive && TargetObject != nullptr)
-	{
-		player->SetActorLocation(GetTarget()->GetActorLocation());
+		FVector Velocity = FVector::ZeroVector;
+		APurgatoryCharacter* PlayerChar = nullptr;
+
+		if (ActorToTeleport->IsA(APurgatoryCharacter::StaticClass()) && ActorToTeleport != nullptr)
+		{
+			PlayerChar = Cast<APurgatoryCharacter>(ActorToTeleport);
+			Velocity = PlayerChar->GetVelocity();
+		}
+
+		//Calculate and apply new location
+		FHitResult HitResult;
+		FVector NewLocation = ConvertLocationToActorSpace(ActorToTeleport->GetActorLocation(), this, TargetObject);
+		ActorToTeleport->SetActorLocation(NewLocation, false, &HitResult, ETeleportType::TeleportPhysics);
+
+		FRotator NewRotation = ConvertRotationToActorSpace(ActorToTeleport->GetActorRotation(), this, TargetObject);
+		ActorToTeleport->SetActorRelativeRotation(NewRotation);
 	}
 }
 

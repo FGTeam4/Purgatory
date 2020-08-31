@@ -49,7 +49,7 @@ public:
 	void SetActive(bool NewActive);
 
 	UFUNCTION(BlueprintCallable)
-	void TeleportPlayer();
+	void TeleportPlayer(AActor* ActorToTeleport);
 
 	UFUNCTION(BlueprintCallable, Category = "Portal")
 	bool IsPlayerInFrontOfPortal(FVector point, FVector PortalLocation, FVector PortalNormal);
@@ -71,7 +71,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsActive = true;
 
-	UPROPERTY(EditAnywhere, Category = "Portal")
+	UPROPERTY(BlueprintReadWrite, Category = "Portal")
 	ACharacter* player;
 private:
 

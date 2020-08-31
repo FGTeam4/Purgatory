@@ -68,7 +68,7 @@ private:
 	UPROPERTY()
 	APlayerController* ControllerOwner;
 
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, Category = "Player")
 	APurgatoryCharacter* PlayerCharacter;
 
 	int32 PreviousScreenSizeX;
