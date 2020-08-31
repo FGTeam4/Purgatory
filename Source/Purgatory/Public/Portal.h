@@ -23,9 +23,6 @@ public:
 public:
 	ATriggerBox* PortalTrigger;
 
-	UPROPERTY(BlueprintReadWrite)
-	USceneComponent* PortalRootComponent;
-
 private:
 
 	FVector LastPosition;
@@ -69,13 +66,17 @@ public:
 	void ForceTick();
 
 public:
+
+	UPROPERTY(BlueprintReadWrite)
+	USceneComponent* PortalRootComponent;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsActive = true;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Portal")
 	ACharacter* Player;
-private:
 
+private:
 	AActor* TargetObject = nullptr;
 
 private :

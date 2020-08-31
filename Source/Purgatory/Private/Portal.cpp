@@ -68,7 +68,7 @@ void APortal::SetActive(bool NewActive)
 
 void APortal::TeleportPlayer(AActor* ActorToTeleport)
 {
-	if (ActorToTeleport != nullptr)
+	if (ActorToTeleport != nullptr && bIsActive)
 	{
 		if (Player == nullptr)
 		{
