@@ -34,19 +34,22 @@ public:
 	float DistanceToPlayer;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector PlayerFacingStart;
+	FVector NewLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool Stop;
+	FVector PlayerFacingStart;
 
 	UFUNCTION(BlueprintCallable)
-	bool CheckMove();
+	bool CheckDistance();
 
 	UFUNCTION(BlueprintCallable)
-	void SetLocation();
+	FVector CalculateLocation();
 
 	UFUNCTION(BlueprintCallable)
-	void RotateSelfYaw(float Degrees);
+	void MoveActor(FVector Destination);
+
+	UFUNCTION(BlueprintCallable)
+	void RotateActorYaw(float Degrees);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
