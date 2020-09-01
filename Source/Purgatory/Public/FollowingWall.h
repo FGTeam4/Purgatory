@@ -15,6 +15,17 @@ public:
 
 	AFollowingWall();
 
+	UFUNCTION(BlueprintCallable)
+	void MoveActor();
+
+	UFUNCTION(BlueprintCallable)
+	void RotateActorYaw(float Degrees);
+
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+public:
+
 	UPROPERTY(EditAnywhere)
 	ACharacter* PlayerCharacter;
 
@@ -23,7 +34,7 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* DistanceSecond;
-	
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* DistanceThird;
 
@@ -31,35 +42,38 @@ public:
 	UStaticMeshComponent* DistanceFourth;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DistanceToPlayer;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector NewLocation;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector PlayerFacingStart;
-
-	UFUNCTION(BlueprintCallable)
-	bool CheckDistance();
-
-	UFUNCTION(BlueprintCallable)
-	FVector CalculateLocation();
-
-	UFUNCTION(BlueprintCallable)
-	void MoveActor(FVector Destination);
-
-	UFUNCTION(BlueprintCallable)
-	void RotateActorYaw(float Degrees);
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-private:
+	float DistanceToPlayer = 400.0f;
 
 	UPROPERTY(EditAnywhere)
-	FVector UpVector;
+	float MoveAmount = 0.0001f;
+
+	UPROPERTY(EditAnywhere)
+	int MoveSpeed = 10;
 
 protected:
 
 	virtual void BeginPlay() override;
+
+private:
+
+	UFUNCTION()
+	bool CheckDistance();
+
+	UFUNCTION()
+	void CalculateLocation();
+
+private:
+
+	UPROPERTY()
+	FVector MoveVector;
+
+	UPROPERTY()
+	FVector PlayerFacingStart;
+
+	UPROPERTY()
+	bool bMoving;
+
+	UPROPERTY()
+	int CurrentMoveStep = 0;
+
 };
