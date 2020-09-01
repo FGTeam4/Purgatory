@@ -18,8 +18,25 @@ void AFollowingWall::BeginPlay()
 	if (PlayerCharacter != nullptr)
 	{
 		PlayerFacingStart = PlayerCharacter->GetActorForwardVector();
+		PlayerFacingStart.X = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.X);
+		PlayerFacingStart.Y = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Y);
+		PlayerFacingStart.Z = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Z);
 	}
-	UpVector = GetActorUpVector();
+}
+
+// Called every frame
+void AFollowingWall::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (CheckDistance())
+	{
+		CalculateLocation();
+	}
+	if (bMoving)
+	{
+		MoveActor();
+	}
 }
 
 bool AFollowingWall::CheckDistance()
@@ -49,40 +66,56 @@ bool AFollowingWall::CheckDistance()
 	return true;
 }
 
-FVector AFollowingWall::CalculateLocation()
+void AFollowingWall::CalculateLocation()
 {
-	NewLocation = PlayerFacingStart;
-	NewLocation.X *= DistanceToPlayer;
-	NewLocation.Y *= DistanceToPlayer;
-	if (NewLocation.X < 0.0f || NewLocation.Y < 0.0f)
+	FVector ActorLocation = GetActorLocation();
+	MoveVector.Z = 0.0f;
+	MoveVector.X = ActorLocation.X;
+	MoveVector.Y = ActorLocation.Y;
+	MoveVector = (PlayerCharacter->GetActorLocation() - MoveVector);
+	bMoving = true;
+}
+
+void AFollowingWall::MoveActor()
+{
+	if (PlayerFacingStart.X != 0.0f)
 	{
-		NewLocation = PlayerCharacter->GetActorLocation() - NewLocation;
+		SetActorLocation(FVector(GetActorLocation().X, PlayerCharacter->GetActorLocation().Y, GetActorLocation().Z));
+	}
+	else if (PlayerFacingStart.Y != 0.0f)
+	{
+		SetActorLocation(FVector(PlayerCharacter->GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
+	}
+	if (++CurrentMoveStep <= MoveSpeed)
+	{
+		if (PlayerFacingStart.X < 0.0f || PlayerFacingStart.Y < 0.0f)
+		{
+			MoveVector = GetActorLocation() - MoveVector * MoveAmount * CurrentMoveStep * PlayerFacingStart;
+		}
+		else
+		{
+			MoveVector = GetActorLocation() + MoveVector * MoveAmount * CurrentMoveStep * PlayerFacingStart;
+		}
+		if (!SetActorLocation(MoveVector, true))
+		{
+			CurrentMoveStep = 0;
+			bMoving = false;
+		}
 	}
 	else
 	{
-		NewLocation = PlayerCharacter->GetActorLocation() + NewLocation;
+		CurrentMoveStep = 0;
+		bMoving = false;
 	}
-	return NewLocation;
-}
-
-void AFollowingWall::MoveActor(FVector Destination)
-{
-	SetActorLocation(Destination);
 }
 
 void AFollowingWall::RotateActorYaw(float Degrees)
 {
-	PlayerFacingStart = PlayerFacingStart.RotateAngleAxis(Degrees, UpVector);
+	PlayerFacingStart = PlayerFacingStart.RotateAngleAxis(Degrees, GetActorUpVector());
+	PlayerFacingStart.X = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.X);
+	PlayerFacingStart.Y = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Y);
+	PlayerFacingStart.Z = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Z);
 	FRotator NewRotation = GetActorRotation().Add(0.0f, Degrees, 0.0f);
 	SetActorRotation(NewRotation);
-}
-
-// Called every frame
-void AFollowingWall::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-	if (CheckDistance())
-	{
-		MoveActor(CalculateLocation());
-	}
+	SetActorLocation(PlayerCharacter->GetActorLocation() - PlayerFacingStart * DistanceToPlayer * 4.0f);
 }
