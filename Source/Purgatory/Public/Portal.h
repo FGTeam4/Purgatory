@@ -16,7 +16,6 @@ class PURGATORY_API APortal : public AActor
 {
 	GENERATED_BODY()
 
-
 public:
 	APortal();
 
@@ -71,7 +70,7 @@ public:
 	USceneComponent* PortalRootComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	bool bIsActive = true;
+	bool bIsActive = false;
 
 	UPROPERTY(BlueprintReadWrite, Category = "Portal")
 	ACharacter* Player;

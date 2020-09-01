@@ -51,6 +51,7 @@ private:
 
 	void UpdateCapture(APortal* Portal);
 
+	UFUNCTION(BlueprintCallable)
 	void Update(float DeltaTime);
 
 private:
@@ -67,7 +68,7 @@ private:
 	UPROPERTY()
 	APlayerController* ControllerOwner;
 
-	UPROPERTY(EditAnywhere, Category = "Player")
+	UPROPERTY()
 	APurgatoryCharacter* PlayerCharacter;
 
 	int32 PreviousScreenSizeX;
@@ -76,4 +77,6 @@ private:
 public:
 	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
 	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);
+
+
 };

@@ -18,8 +18,7 @@ APortal::APortal()
 	PortalRootComponent->SetupAttachment(GetRootComponent());
 	PortalRootComponent->SetRelativeLocation(FVector(0.0f, 0.0f, 0.0f));
 	PortalRootComponent->SetRelativeRotation(FRotator(0.0f, 0.0f, 0.0f));
-	PortalRootComponent->Mobility = EComponentMobility::Static;
-
+	PortalRootComponent->Mobility = EComponentMobility::Movable;
 }
 
 // Called when the game starts or when spawned
@@ -32,12 +31,12 @@ void APortal::BeginPlay()
 		Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
 	}
 
-	if (TargetObject != nullptr)
-	{
-		UBoxComponent* TargetCollider = nullptr;
-		TargetCollider = TargetObject->FindComponentByClass<UBoxComponent>();
-		TargetObject->SetActorEnableCollision(false);
-	}
+	//if (TargetObject != nullptr)
+	//{
+	//	UBoxComponent* TargetCollider = nullptr;
+	//	TargetCollider = TargetObject->FindComponentByClass<UBoxComponent>();
+	//	TargetObject->SetActorEnableCollision(false);
+	//}
 }
 
 // Called every frame
@@ -68,42 +67,46 @@ void APortal::SetActive(bool NewActive)
 
 void APortal::TeleportPlayer(AActor* ActorToTeleport)
 {
-	if (ActorToTeleport != nullptr && bIsActive)
+	if (TargetObject != nullptr)
 	{
-		if (Player == nullptr)
+		if (ActorToTeleport != nullptr)
 		{
-			Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+			if (Player == nullptr)
+			{
+				Player = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+			}
+
+			FVector Velocity = FVector::ZeroVector;
+			APurgatoryCharacter* PlayerChar = nullptr;
+
+			if (ActorToTeleport->IsA(APurgatoryCharacter::StaticClass()) && ActorToTeleport != nullptr)
+			{
+				PlayerChar = Cast<APurgatoryCharacter>(ActorToTeleport);
+				Velocity = PlayerChar->GetVelocity();
+			}
+
+			//Calculate and apply new location
+			FHitResult HitResult;
+			FVector NewLocation = ConvertLocationToActorSpace(ActorToTeleport->GetActorLocation(), this, TargetObject);
+			ActorToTeleport->SetActorLocation(NewLocation, false, &HitResult, ETeleportType::TeleportPhysics);
+
+			FRotator NewRotation = ConvertRotationToActorSpace(ActorToTeleport->GetActorRotation(), this, TargetObject);
+			ActorToTeleport->SetActorRelativeRotation(NewRotation);
+
+			FVector Dots;
+			Dots.X = FVector::DotProduct(Velocity, GetActorForwardVector());
+			Dots.Y = FVector::DotProduct(Velocity, GetActorRightVector());
+			Dots.Z = FVector::DotProduct(Velocity, GetActorUpVector());
+
+			FVector NewVelocity = Dots.X * TargetObject->GetActorForwardVector() +
+				Dots.Y * TargetObject->GetActorRightVector() +
+				Dots.Z * TargetObject->GetActorUpVector();
+
+			//UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)->GetCharacterMovement()->Velocity = NewVelocity;
+			//GetCharacterMovement()->Velocity = NewVelocity;
+
+			LastPosition = NewLocation;
 		}
-
-		FVector Velocity = FVector::ZeroVector;
-		APurgatoryCharacter* PlayerChar = nullptr;
-
-		if (ActorToTeleport->IsA(APurgatoryCharacter::StaticClass()) && ActorToTeleport != nullptr)
-		{
-			PlayerChar = Cast<APurgatoryCharacter>(ActorToTeleport);
-			Velocity = PlayerChar->GetVelocity();
-		}
-
-		//Calculate and apply new location
-		FHitResult HitResult;
-		FVector NewLocation = ConvertLocationToActorSpace(ActorToTeleport->GetActorLocation(), this, TargetObject);
-		ActorToTeleport->SetActorLocation(NewLocation, false, &HitResult, ETeleportType::TeleportPhysics);
-
-		FRotator NewRotation = ConvertRotationToActorSpace(ActorToTeleport->GetActorRotation(), this, TargetObject);
-		ActorToTeleport->SetActorRelativeRotation(NewRotation);
-
-		FVector Dots;
-		Dots.X = FVector::DotProduct(Velocity, GetActorForwardVector());
-		Dots.Y = FVector::DotProduct(Velocity, GetActorRightVector());
-		Dots.Z = FVector::DotProduct(Velocity, GetActorUpVector());
-
-		FVector NewVelocity = Dots.X * TargetObject->GetActorForwardVector() +
-			Dots.Y * TargetObject->GetActorRightVector() +
-			Dots.Z * TargetObject->GetActorUpVector();
-
-		//Player->GetCharacterMovement()->Velocity = NewVelocity;
-
-		LastPosition = NewLocation;
 	}
 }
 
@@ -131,12 +134,7 @@ bool APortal::IsPlayerCrossingPortal(FVector Point, FVector PortalLocation, FVec
 	//Did we intersect the portal since last location
 	//If yes, check direction, crossing forward means we were in front and now the back.
 
-	//if (IsIntersecting && !IsInFront && bLastInFront)
-	//{
-	//	IsCrossing = true;
-	//}
-
-	if (IsIntersecting && !IsInFront)
+	if (IsIntersecting && !IsInFront && bLastInFront)
 	{
 		IsCrossing = true;
 	}

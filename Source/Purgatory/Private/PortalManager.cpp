@@ -19,6 +19,16 @@ APortalManager::APortalManager(const FObjectInitializer& ObjectInitializer) : Su
 void APortalManager::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (Cast<APurgatoryCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0)))
+	{
+		PlayerCharacter = Cast<APurgatoryCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	}
+	if (PlayerCharacter != nullptr)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter is SET!"));
+	}
+
 	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	this->Init();
 }
@@ -71,7 +81,6 @@ void APortalManager::Init()
 
 void APortalManager::UpdateCapture(APortal* Portal)
 {
-	//Retrieve Reference to character and player controller (Maybe just character though?)
 	if (PlayerCharacter == nullptr)
 	{
 		return;
@@ -80,7 +89,7 @@ void APortalManager::UpdateCapture(APortal* Portal)
 	//Update SceneCapture
 
 	if (SceneCaptureComponent != nullptr && PortalTexture != nullptr
-		&& Portal != nullptr && PlayerCharacter != nullptr)
+		&& Portal != nullptr)
 	{
 		UCameraComponent* PlayerCamera = PlayerCharacter->GetCamera();
 		AActor* Target = Portal->GetTarget();
@@ -89,6 +98,8 @@ void APortalManager::UpdateCapture(APortal* Portal)
 		{
 			//Compute new location in the space of target actor(May not be aligned in world)
 			FVector NewLocation = ConvertLocationToActorSpace(PlayerCamera->GetComponentLocation(), Portal, Target);
+
+			UE_LOG(LogTemp, Warning, TEXT("New Location for SceneCapture is: %s"), *NewLocation.ToString());
 			SceneCaptureComponent->SetWorldLocation(NewLocation);
 
 			//Compute new rotation in the space of target location
@@ -113,6 +124,8 @@ void APortalManager::UpdateCapture(APortal* Portal)
 		//Assign render target
 		Portal->SetRTT(PortalTexture);
 		SceneCaptureComponent->TextureTarget = PortalTexture;
+
+		GeneratePortalTexture();
 
 		//Get the projection matrix
 		SceneCaptureComponent->CustomProjectionMatrix = PlayerCharacter->GetCameraProjectionMatrix();
@@ -169,6 +182,7 @@ APortal* APortalManager::UpdatePortalsInTheWorld()
 	for (TActorIterator<APortal>ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{
 		APortal* Portal = *ActorItr;
+
 		FVector PortalLocation = Portal->GetActorLocation();
 		FVector PortalNormal = -1 * Portal->GetActorForwardVector();
 
@@ -180,8 +194,8 @@ APortal* APortalManager::UpdatePortalsInTheWorld()
 
 		if (NewDistance < Distance)
 		{
-			Distance = NewDistance;
 			ActivePortal = Portal;
+			Distance = NewDistance;
 		}
 	}
 
@@ -243,7 +257,7 @@ void APortalManager::GeneratePortalTexture()
 		PortalTexture->AddressX = TextureAddress::TA_Clamp;
 		PortalTexture->AddressY = TextureAddress::TA_Clamp;
 
-		//PortalTexture->bAutoGenerateMips = false;
+		PortalTexture->bAutoGenerateMips = true;
 
 		//Force the engine to create a new render target
 		PortalTexture->UpdateResource();
