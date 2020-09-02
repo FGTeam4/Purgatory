@@ -9,6 +9,7 @@
 #include "Kismet/GameplayStatics.h"
 #include <Runtime\Engine\Classes\Engine\TriggerBox.h>
 #include "Purgatory\PurgatoryCharacter.h"
+#include "FollowingWall.h"
 #include "Portal.generated.h"
 
 UCLASS()
@@ -69,7 +70,10 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Portal")
 	ACharacter* Player;
 
-	UPROPERTY(BlueprintReadWrite, Category = "Wall Rotation")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Rotation")
+	AFollowingWall* FollowingWall;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Rotation")
 	float WallRotateByAmount = 90.f;
 
 private:
