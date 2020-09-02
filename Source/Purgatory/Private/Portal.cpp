@@ -119,6 +119,14 @@ bool APortal::IsPlayerInFrontOfPortal(FVector Point, FVector PortalLocation, FVe
 	return (PortalDot >= 0);
 }
 
+bool APortal::IsPlayerBehindPortal(FVector Point, FVector PortalLocation, FVector PortalNormal)
+{
+	FPlane PortalPlane = FPlane(PortalLocation, PortalNormal);
+	float PortalDot = PortalPlane.PlaneDot(Point);
+
+	return (PortalDot < 0);
+}
+
 bool APortal::IsPlayerCrossingPortal(FVector Point, FVector PortalLocation, FVector PortalNormal)
 {
 	FVector IntersectionPoint;

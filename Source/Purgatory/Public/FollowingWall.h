@@ -19,6 +19,9 @@ public:
 	void MoveActor();
 
 	UFUNCTION(BlueprintCallable)
+	void OnLevelReset();
+
+	UFUNCTION(BlueprintCallable)
 	void RotateActorYaw(float Degrees);
 
 	// Called every frame
@@ -69,6 +72,9 @@ private:
 
 	UPROPERTY()
 	FVector PlayerFacingStart;
+
+	UPROPERTY()
+	FVector PlayerStartPosition;
 
 	UPROPERTY()
 	bool bMoving;

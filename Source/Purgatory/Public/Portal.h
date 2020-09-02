@@ -48,12 +48,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void TeleportPlayer(AActor* ActorToTeleport);
 
-	UFUNCTION(BlueprintCallable, Category = "Portal")
-	bool IsPlayerInFrontOfPortal(FVector point, FVector PortalLocation, FVector PortalNormal);
-
-	UFUNCTION(BlueprintCallable, Category = "Portal")
-	bool IsPlayerCrossingPortal(FVector Point, FVector PortalLocaion, FVector PortalNormal);
-
 	/* Render texture functions */
 	UFUNCTION(BlueprintImplementableEvent, Category = "Portal")
 	void ClearRTT();
@@ -82,6 +76,15 @@ private :
 	/* PURELY HELPER FUNCTIONS */
 	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
 	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);
+
+	UFUNCTION(BlueprintCallable, Category = "Portal")
+	bool IsPlayerInFrontOfPortal(FVector point, FVector PortalLocation, FVector PortalNormal);
+
+	UFUNCTION(BlueprintCallable, Category = "Portal")
+	bool IsPlayerCrossingPortal(FVector Point, FVector PortalLocaion, FVector PortalNormal);
+
+	UFUNCTION(BlueprintCallable, Category = "Portal")
+	bool IsPlayerBehindPortal(FVector Point, FVector PortalLocation, FVector PortalNormal);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPointInsideBox(FVector Point, UBoxComponent* Box);
