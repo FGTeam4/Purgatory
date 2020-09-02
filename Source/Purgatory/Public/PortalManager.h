@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
+#include "FollowingWall.h"
 #include "Purgatory/PurgatoryCharacter.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
@@ -33,6 +34,15 @@ public:
 
 	void Init();
 
+	/* Gets reference to following wall and player and adds them aswell as all portals in the scene to HiddenObjects array**/
+	void HandleHiddenObjects();
+
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Rendering")
+		TArray<AActor*> HiddenObjects;
+
+	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
+	AFollowingWall* FollowingWall;
 
 private:
 	void CreateRenderTarget(UTextureRenderTarget* NewRenderTarget, APortal* Portal);
@@ -60,6 +70,8 @@ private:
 	//Used here to be reusable
 	USceneCaptureComponent2D* SceneCaptureComponent;
 
+
+
 	UPROPERTY(transient)
 	UTextureRenderTarget2D* PortalTexture;
 
@@ -80,6 +92,4 @@ private:
 public:
 	FVector ConvertLocationToActorSpace(FVector Location, AActor* Ref, AActor* Target);
 	FRotator ConvertRotationToActorSpace(FRotator Rotation, AActor* Ref, AActor* Target);
-
-
 };

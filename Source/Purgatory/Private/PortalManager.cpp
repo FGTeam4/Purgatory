@@ -25,6 +25,11 @@ void APortalManager::BeginPlay()
 		PlayerCharacter = Cast<APurgatoryCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	}
 
+	//for (int i = 0; i < HiddenObjects.Num(); i++)
+	//{
+	//	Portals.Add(HiddenObjects[i]);
+	//}
+
 	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	this->Init();
 }
@@ -36,9 +41,26 @@ void APortalManager::Tick(float DeltaTime)
 	Update(DeltaTime);
 }
 
+void APortalManager::HandleHiddenObjects()
+{
+	if (FollowingWall != nullptr && PlayerCharacter != nullptr)
+	{
+		HiddenObjects.Add(PlayerCharacter);
+
+		HiddenObjects.Add(FollowingWall);
+
+		for (int i = 0; i < Portals.Num(); i++)
+		{
+			HiddenObjects.Add(Portals[i]);
+		}
+	}
+}
+
 
 void APortalManager::Init()
 {
+	HandleHiddenObjects();
+
 	SceneCaptureComponent = NewObject<USceneCaptureComponent2D>(this, USceneCaptureComponent2D::StaticClass(), *FString("PortalSceneCaptureComponent"));
 	SceneCaptureComponent->RegisterComponent();
 
@@ -51,6 +73,8 @@ void APortalManager::Init()
 	SceneCaptureComponent->bUseCustomProjectionMatrix = true;
 	//Expensive, but needed to render all information.
 	SceneCaptureComponent->CaptureSource = ESceneCaptureSource::SCS_SceneColorSceneDepth;
+
+	SceneCaptureComponent->HiddenActors = HiddenObjects;
 
 	FPostProcessSettings CaptureSettings;
 
@@ -110,7 +134,7 @@ void APortalManager::UpdateCapture(APortal* Portal)
 
 			//Clip Plane to ignore objects between the scene capture and the target of the portal
 			SceneCaptureComponent->ClipPlaneNormal = Target->GetActorForwardVector();
-			SceneCaptureComponent->ClipPlaneBase = Target->GetActorLocation() + 
+			SceneCaptureComponent->ClipPlaneBase = Target->GetActorLocation() +
 				(SceneCaptureComponent->ClipPlaneNormal * -1.5f); //Offset to avoid visible pixel border
 		}
 
@@ -141,7 +165,7 @@ void APortalManager::Update(float DeltaTime)
 	}
 
 	APortal* Portal = UpdatePortalsInTheWorld();
-	
+
 	if (Portal != nullptr)
 	{
 		UpdateCapture(Portal);
@@ -171,7 +195,7 @@ APortal* APortalManager::UpdatePortalsInTheWorld()
 	APortal* ActivePortal = nullptr;
 	FVector PlayerLocation = Character->GetActorLocation();
 	FVector CameraLocation = PlayerCharacter->GetCamera()->GetComponentLocation();
-	
+
 	float Distance = RenderDistance;
 
 	for (TActorIterator<APortal>ActorItr(GetWorld()); ActorItr; ++ActorItr)
