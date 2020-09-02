@@ -24,10 +24,6 @@ void APortalManager::BeginPlay()
 	{
 		PlayerCharacter = Cast<APurgatoryCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	}
-	if (PlayerCharacter != nullptr)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("PlayerCharacter is SET!"));
-	}
 
 	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	this->Init();
@@ -99,7 +95,6 @@ void APortalManager::UpdateCapture(APortal* Portal)
 			//Compute new location in the space of target actor(May not be aligned in world)
 			FVector NewLocation = ConvertLocationToActorSpace(PlayerCamera->GetComponentLocation(), Portal, Target);
 
-			UE_LOG(LogTemp, Warning, TEXT("New Location for SceneCapture is: %s"), *NewLocation.ToString());
 			SceneCaptureComponent->SetWorldLocation(NewLocation);
 
 			//Compute new rotation in the space of target location
@@ -177,7 +172,7 @@ APortal* APortalManager::UpdatePortalsInTheWorld()
 	FVector PlayerLocation = Character->GetActorLocation();
 	FVector CameraLocation = PlayerCharacter->GetCamera()->GetComponentLocation();
 	
-	float Distance = 4096.0f;
+	float Distance = RenderDistance;
 
 	for (TActorIterator<APortal>ActorItr(GetWorld()); ActorItr; ++ActorItr)
 	{

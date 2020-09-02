@@ -65,6 +65,9 @@ private:
 
 	float UpdateDelay;
 
+	UPROPERTY(EditAnywhere, Category = "Portal Rendering")
+	float RenderDistance = 5000.f;
+
 	UPROPERTY()
 	APlayerController* ControllerOwner;
 
