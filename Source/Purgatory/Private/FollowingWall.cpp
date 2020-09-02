@@ -18,6 +18,7 @@ void AFollowingWall::BeginPlay()
 	if (PlayerCharacter != nullptr)
 	{
 		PlayerFacingStart = PlayerCharacter->GetActorForwardVector();
+		PlayerStartPosition = PlayerCharacter->GetActorLocation();
 		PlayerFacingStart.X = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.X);
 		PlayerFacingStart.Y = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Y);
 		PlayerFacingStart.Z = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Z);
@@ -107,6 +108,12 @@ void AFollowingWall::MoveActor()
 		CurrentMoveStep = 0;
 		bMoving = false;
 	}
+}
+
+void AFollowingWall::OnLevelReset()
+{
+	PlayerStartPosition = PlayerCharacter->GetActorLocation();
+	SetActorLocation(PlayerStartPosition - PlayerFacingStart * DistanceToPlayer);
 }
 
 void AFollowingWall::RotateActorYaw(float Degrees)
