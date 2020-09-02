@@ -16,18 +16,33 @@ public:
 	AFollowingWall();
 
 	UFUNCTION(BlueprintCallable)
-	void MoveActor();
-
-	UFUNCTION(BlueprintCallable)
 	void OnLevelReset();
 
 	UFUNCTION(BlueprintCallable)
-	void RotateActorYaw(float Degrees);
-
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	void SetYawRotation(float Degrees);
 
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float DistanceToPlayer = 400.0f;
+
+	UPROPERTY(EditAnywhere)
+	float MoveAmount = 0.0001f;
+
+	UPROPERTY(EditAnywhere)
+	int MoveSpeed = 10;
+
+	/**
+	* Time interval between movement changes
+	*/
+	UPROPERTY(EditAnywhere)
+	float MoveActorInterval = 0.01f;
+
+	/**
+	* Time interval between checking distance to player
+	*/
+	UPROPERTY(EditAnywhere)
+	float CheckDistanceInterval = 0.01f;
 
 	UPROPERTY(EditAnywhere)
 	ACharacter* PlayerCharacter;
@@ -44,40 +59,64 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* DistanceFourth;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DistanceToPlayer = 400.0f;
-
-	UPROPERTY(EditAnywhere)
-	float MoveAmount = 0.0001f;
-
-	UPROPERTY(EditAnywhere)
-	int MoveSpeed = 10;
-
 protected:
 
 	virtual void BeginPlay() override;
 
 private:
 
-	UFUNCTION()
-	bool CheckDistance();
+	/**
+	* Check distance between this Wall and the Player
+	*/
+	void CheckDistance();
 
-	UFUNCTION()
+	/**
+	* Move the Wall towards the Player
+	*/
+	void MoveActor();
+
+	/**
+	* Calculate where to move Wall
+	*/
 	void CalculateLocation();
 
+	/**
+	* Starts the CheckDistance timer
+	*/
+	void StartCheckDistanceTimer();
+
+	/**
+	* Stops the CheckDistance timer
+	*/
+	void StopCheckDistanceTimer();
+
+	/**
+	* Starts the MoveActor timer
+	*/
+	void StartMoveActorTimer();
+
+	/**
+	* Stops the MoveActor timer
+	*/
+	void StopMoveActorTimer();
+
 private:
+
+	/**
+	* Handle for CheckDistance Timer
+	*/
+	FTimerHandle CheckDistanceTimerHandle;
+
+	/**
+	* Timer Handle for Move Timer
+	*/
+	FTimerHandle MoveActorTimerHandle;
 
 	UPROPERTY()
 	FVector MoveVector;
 
 	UPROPERTY()
 	FVector PlayerFacingStart;
-
-	UPROPERTY()
-	FVector PlayerStartPosition;
-
-	UPROPERTY()
-	bool bMoving;
 
 	UPROPERTY()
 	int CurrentMoveStep = 0;
