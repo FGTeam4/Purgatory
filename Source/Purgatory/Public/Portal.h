@@ -69,6 +69,9 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = "Portal")
 	ACharacter* Player;
 
+	UPROPERTY(BlueprintReadWrite, Category = "Wall Rotation")
+	float WallRotateByAmount = 90.f;
+
 private:
 	AActor* TargetObject = nullptr;
 
