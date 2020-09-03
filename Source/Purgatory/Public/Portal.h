@@ -74,6 +74,9 @@ public:
 	AFollowingWall* FollowingWall;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Rotation")
+	bool bRotateWall = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Wall Rotation")
 	float WallRotateByAmount = 90.f;
 
 private:
