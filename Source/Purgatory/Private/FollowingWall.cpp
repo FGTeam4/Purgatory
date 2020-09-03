@@ -76,18 +76,15 @@ void AFollowingWall::CalculateLocation()
 {
 	ActorLocation = GetActorLocation();
 	CurrentPlayerLocation = PlayerCharacter->GetActorLocation();
-	GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("ActorLocation: %f, %f, %f"), ActorLocation.X, ActorLocation.Y, ActorLocation.Z));
 	MoveVector.Z = 0.0f;
 	MoveVector.X = ActorLocation.X;
 	MoveVector.Y = ActorLocation.Y;
-	MoveVector = CurrentPlayerLocation - MoveVector * PlayerFacingStart;
+	MoveVector = (CurrentPlayerLocation - MoveVector) * PlayerFacingStart;
 	MoveVector.Z = 0.0f;
 	if (PlayerFacingStart.X < 0.0f || PlayerFacingStart.Y < 0.0f)
 	{
 		MoveVector *= -1;
 	}
-	GEngine->AddOnScreenDebugMessage(-2, 5.0f, FColor::Green, FString::Printf(TEXT("PlayerCharacter: %f, %f, %f"), CurrentPlayerLocation.X, CurrentPlayerLocation.Y, CurrentPlayerLocation.Z));
-	GEngine->AddOnScreenDebugMessage(-3, 5.0f, FColor::Blue, FString::Printf(TEXT("MoveVector: %f, %f, %f"), MoveVector.X, MoveVector.Y, MoveVector.Z));
 	StartMoveActorTimer();
 }
 
