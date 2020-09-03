@@ -16,7 +16,7 @@ public:
 	AFollowingWall();
 
 	UFUNCTION(BlueprintCallable)
-	void OnLevelReset();
+	void ResetWall(FVector PlayerSpawnLocation);
 
 	UFUNCTION(BlueprintCallable)
 	void SetYawRotation(float Degrees);
@@ -24,13 +24,13 @@ public:
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DistanceToPlayer = 400.0f;
+	float DistanceToPlayer = 200.0f;
 
 	UPROPERTY(EditAnywhere)
-	float MoveAmount = 0.0001f;
+	float MoveAmount = 0.01f;
 
 	UPROPERTY(EditAnywhere)
-	int MoveSpeed = 10;
+	int MoveSpeed = 100;
 
 	/**
 	* Time interval between movement changes
@@ -42,7 +42,7 @@ public:
 	* Time interval between checking distance to player
 	*/
 	UPROPERTY(EditAnywhere)
-	float CheckDistanceInterval = 0.01f;
+	float CheckDistanceInterval = 0.1f;
 
 	UPROPERTY(EditAnywhere)
 	ACharacter* PlayerCharacter;
@@ -117,6 +117,12 @@ private:
 
 	UPROPERTY()
 	FVector PlayerFacingStart;
+
+	UPROPERTY()
+	FVector ActorLocation;
+
+	UPROPERTY()
+	FVector CurrentPlayerLocation;
 
 	UPROPERTY()
 	int CurrentMoveStep = 0;
