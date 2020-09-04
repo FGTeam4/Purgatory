@@ -24,7 +24,7 @@ public:
 public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DistanceToPlayer = 200.0f;
+	float DistanceToPlayer = 300.0f;
 
 	UPROPERTY(EditAnywhere)
 	float MoveAmount = 0.01f;

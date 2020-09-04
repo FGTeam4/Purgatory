@@ -68,12 +68,12 @@ void AFollowingWall::CheckDistance()
 	{
 		return;
 	}
-	StopCheckDistanceTimer();
 	CalculateLocation();
 }
 
 void AFollowingWall::CalculateLocation()
 {
+	StopMoveActorTimer();
 	ActorLocation = GetActorLocation();
 	CurrentPlayerLocation = PlayerCharacter->GetActorLocation();
 	MoveVector.Z = 0.0f;
@@ -103,6 +103,11 @@ void AFollowingWall::MoveActor()
 		FVector TempVector = ActorLocation + MoveVector * MoveAmount * CurrentMoveStep;
 		TempVector.Z = CurrentPlayerLocation.Z;
 		if (!SetActorLocation(TempVector, true))
+		{
+			StopMoveActorTimer();
+			StartCheckDistanceTimer();
+		}
+		if (FVector::Distance(GetActorLocation(), PlayerCharacter->GetActorLocation()) <= DistanceToPlayer)
 		{
 			StopMoveActorTimer();
 			StartCheckDistanceTimer();
