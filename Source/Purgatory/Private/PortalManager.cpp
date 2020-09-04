@@ -2,6 +2,7 @@
 
 
 #include "PortalManager.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 APortalManager::APortalManager(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -225,14 +226,17 @@ void APortalManager::RequestTeleport(APortal* Portal, ACharacter* Player)
 {
 	if (Portal != nullptr && Player != nullptr)
 	{
-		Portal->TeleportPlayer(Player);
-
-		APortal* FuturePortal = UpdatePortalsInTheWorld();
-
-		if (FuturePortal != nullptr)
+		if (!Player->GetMovementComponent()->IsFalling())
 		{
-			FuturePortal->ForceTick();
-			UpdateCapture(FuturePortal);
+			Portal->TeleportPlayer(Player);
+
+			APortal* FuturePortal = UpdatePortalsInTheWorld();
+
+			if (FuturePortal != nullptr)
+			{
+				FuturePortal->ForceTick();
+				UpdateCapture(FuturePortal);
+			}
 		}
 	}
 }
