@@ -26,20 +26,16 @@ void APortalManager::BeginPlay()
 		PlayerCharacter = Cast<APurgatoryCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 	}
 
-	//for (int i = 0; i < HiddenObjects.Num(); i++)
-	//{
-	//	Portals.Add(HiddenObjects[i]);
-	//}
-
 	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	this->Init();
+
+	UE_LOG(LogTemp, Warning, TEXT("Portal Count: %d"), Portals.Num());
 }
 
 // Called every frame
 void APortalManager::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	Update(DeltaTime);
 }
 
 void APortalManager::HandleHiddenObjects()
@@ -57,9 +53,24 @@ void APortalManager::HandleHiddenObjects()
 	}
 }
 
+void APortalManager::HideObjectsInRoom(FName CurrentRoomTag)
+{
+	TArray<AActor*> ObjectsToHide;
+	UGameplayStatics::GetAllActorsOfClassWithTag(GetWorld(), AActor::StaticClass(), CurrentRoomTag, ObjectsToHide);
+
+	for (int i = 0; i < ObjectsToHide.Num(); i++)
+	{
+		SceneCaptureComponent->HiddenActors.AddUnique(ObjectsToHide[i]);
+	}
+
+	ObjectsToHide.Empty();
+}
+
 
 void APortalManager::Init()
 {
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APortal::StaticClass(), Portals);
+
 	HandleHiddenObjects();
 
 	SceneCaptureComponent = NewObject<USceneCaptureComponent2D>(this, USceneCaptureComponent2D::StaticClass(), *FString("PortalSceneCaptureComponent"));
@@ -75,9 +86,16 @@ void APortalManager::Init()
 	//Expensive, but needed to render all information.
 	SceneCaptureComponent->CaptureSource = ESceneCaptureSource::SCS_SceneColorSceneDepth;
 
+	SceneCaptureComponent->ShowFlags.SetDynamicShadows(true);
+	
+	//SceneCaptureComponent->HiddenComponents = HiddenComponents;
+
 	SceneCaptureComponent->HiddenActors = HiddenObjects;
 
 	FPostProcessSettings CaptureSettings;
+
+	UCameraComponent* PlayerCam = nullptr;
+	PlayerCam = PlayerCharacter->GetCamera();
 
 	CaptureSettings.bOverride_AmbientOcclusionQuality = true;
 	CaptureSettings.bOverride_MotionBlurAmount = true;
@@ -121,6 +139,7 @@ void APortalManager::UpdateCapture(APortal* Portal)
 			FVector NewLocation = ConvertLocationToActorSpace(PlayerCamera->GetComponentLocation(), Portal, Target);
 
 			SceneCaptureComponent->SetWorldLocation(NewLocation);
+			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("New Location: %s"), NewLocation.ToString()));
 
 			//Compute new rotation in the space of target location
 			FTransform CameraTransform = PlayerCamera->GetComponentTransform();

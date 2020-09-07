@@ -37,12 +37,34 @@ public:
 	/* Gets reference to following wall and player and adds them aswell as all portals in the scene to HiddenObjects array**/
 	void HandleHiddenObjects();
 
+	UFUNCTION(BlueprintCallable, Category = "Portal")
+	void HideObjectsInRoom(FName CurrentRoomTag);
+
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Rendering")
 		TArray<AActor*> HiddenObjects;
 
 	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
 	AFollowingWall* FollowingWall;
+
+	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
+	FName IgnoreTagRoom1;
+
+	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
+	FName IgnoreTagRoom2;
+
+	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
+	FName IgnoreTagRoom3;
+
+	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
+	FName IgnoreTagRoom4;
+
+	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
+	FName IgnoreTagRoom5;
+
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Rendering")
+	TArray<UStaticMeshComponent*> HiddenComponents;
 
 private:
 	void CreateRenderTarget(UTextureRenderTarget* NewRenderTarget, APortal* Portal);
@@ -69,8 +91,8 @@ private:
 
 	//Used here to be reusable
 	USceneCaptureComponent2D* SceneCaptureComponent;
-
-
+	
+	TArray<FName> Tags;
 
 	UPROPERTY(transient)
 	UTextureRenderTarget2D* PortalTexture;
