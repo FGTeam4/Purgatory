@@ -28,8 +28,7 @@ void APortalManager::BeginPlay()
 
 	this->AttachToActor(PlayerCharacter, FAttachmentTransformRules::SnapToTargetIncludingScale);
 	this->Init();
-
-	UE_LOG(LogTemp, Warning, TEXT("Portal Count: %d"), Portals.Num());
+	HideObjectsInRoom(IgnoreTagRoom1);
 }
 
 // Called every frame
