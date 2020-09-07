@@ -62,13 +62,6 @@ void APurgatoryCharacter::SetupPlayerInputComponent(class UInputComponent* Playe
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
 
-	// Bind jump events
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
-
-	//PlayerInputComponent->BindAction("E", IE_Pressed, this, &APurgatoryCharacter::HoldObject);
-//PlayerInputComponent->BindAction("E", IE_Released, this, &APurgatoryCharacter::HoldObject);
-
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &APurgatoryCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &APurgatoryCharacter::MoveRight);
@@ -111,8 +104,11 @@ void APurgatoryCharacter::TurnAtRate(float Rate)
 
 void APurgatoryCharacter::LookUpAtRate(float Rate)
 {
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	if (Rate != 0.0f)
+	{
+		// calculate delta for this frame from the rate information
+		AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	}
 }
 
 FMatrix APurgatoryCharacter::GetCameraProjectionMatrix()
