@@ -72,3 +72,4 @@ Plugins/*/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+Content/Purgatory/Materials/MaterialInstances/MI_Glass.uasset
