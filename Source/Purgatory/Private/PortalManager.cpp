@@ -2,7 +2,9 @@
 
 
 #include "PortalManager.h"
+#include "Engine/LevelStreaming.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include <Runtime\Engine\Classes\Materials\MaterialInstanceActor.h>
 
 // Sets default values
 APortalManager::APortalManager(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
@@ -65,7 +67,6 @@ void APortalManager::HideObjectsInRoom(FName CurrentRoomTag)
 	ObjectsToHide.Empty();
 }
 
-
 void APortalManager::Init()
 {
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), APortal::StaticClass(), Portals);
@@ -76,25 +77,38 @@ void APortalManager::Init()
 	SceneCaptureComponent->RegisterComponent();
 
 	//Mostly post processing
-	SceneCaptureComponent->bCaptureEveryFrame = false;
+	SceneCaptureComponent->bCaptureEveryFrame = true;
 	SceneCaptureComponent->bCaptureOnMovement = false;
 	SceneCaptureComponent->LODDistanceFactor = 3;
 	SceneCaptureComponent->TextureTarget = nullptr;
 	SceneCaptureComponent->bEnableClipPlane = true;
 	SceneCaptureComponent->bUseCustomProjectionMatrix = true;
 	//Expensive, but needed to render all information.
-	SceneCaptureComponent->CaptureSource = ESceneCaptureSource::SCS_SceneColorSceneDepth;
+	SceneCaptureComponent->CaptureSource = ESceneCaptureSource::SCS_FinalColorHDR;
 
 	SceneCaptureComponent->ShowFlags.SetDynamicShadows(true);
 	
-	//SceneCaptureComponent->HiddenComponents = HiddenComponents;
-
 	SceneCaptureComponent->HiddenActors = HiddenObjects;
 
-	FPostProcessSettings CaptureSettings;
+	//TArray<ULevelStreaming*> Worlds;
+	//UWorld* LightingSubLevel = nullptr;
+	//
+	//Worlds = GetWorld()->GetStreamingLevels();
+	//
+	//for (int i = 0; i < Worlds.Num(); i++)
+	//{
+	//	if (Worlds[i]->GetName().Contains("Lighting"))
+	//	{
+	//		LightingSubLevel = Cast<UWorld>(Worlds[i]);
+	//	}
+	//}
+
+	//CurrentPostProcess = Cast<APostProcessVolume>(UGameplayStatics::GetActorOfClass(LightingSubLevel, APostProcessVolume::StaticClass()));
 
 	UCameraComponent* PlayerCam = nullptr;
 	PlayerCam = PlayerCharacter->GetCamera();
+
+	FPostProcessSettings CaptureSettings;
 
 	CaptureSettings.bOverride_AmbientOcclusionQuality = true;
 	CaptureSettings.bOverride_MotionBlurAmount = true;
@@ -102,16 +116,18 @@ void APortalManager::Init()
 	CaptureSettings.bOverride_GrainIntensity = true;
 	CaptureSettings.bOverride_ScreenSpaceReflectionQuality = true;
 
-	CaptureSettings.AmbientOcclusionQuality = 0.0f;
-	CaptureSettings.MotionBlurAmount = 0.0f;
-	CaptureSettings.SceneFringeIntensity = 0.0f;
-	CaptureSettings.GrainIntensity = 0.0f;
-	CaptureSettings.ScreenSpaceReflectionQuality = 0.0f;
+	CaptureSettings.AmbientOcclusionQuality = 0.0f; //0=lowest quality..100=maximum quality
+	CaptureSettings.MotionBlurAmount = 0.0f; //0 = disabled
+	CaptureSettings.SceneFringeIntensity = 0.0f; //0 = disabled
+	CaptureSettings.GrainIntensity = 0.0f; //0 = disabled
+	CaptureSettings.ScreenSpaceReflectionQuality = 0.0f; //0 = disabled
 
 	CaptureSettings.bOverride_ScreenPercentage = true;
 	CaptureSettings.ScreenPercentage = 100.0f;
 
-	SceneCaptureComponent->PostProcessSettings = CaptureSettings;
+	SetPostProcessMaterials();
+
+	//SceneCaptureComponent->PostProcessSettings = CaptureSettings;
 
 	//Create RTT Buffer
 	GeneratePortalTexture();

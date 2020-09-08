@@ -7,6 +7,7 @@
 #include "Components/SceneCaptureComponent2D.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "FollowingWall.h"
+#include "Engine/PostProcessVolume.h"
 #include "Purgatory/PurgatoryCharacter.h"
 #include "EngineUtils.h"
 #include "Kismet/GameplayStatics.h"
@@ -40,7 +41,14 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Portal")
 	void HideObjectsInRoom(FName CurrentRoomTag);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void SetPostProcessMaterials();
+
 public:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	USceneCaptureComponent2D* SceneCaptureComponent;
+
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Rendering")
 		TArray<AActor*> HiddenObjects;
 
@@ -48,19 +56,22 @@ public:
 	AFollowingWall* FollowingWall;
 
 	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
-	FName IgnoreTagRoom1;
+	FName IgnoreTagRoom1 = "IgnoreRoom1";
 
 	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
-	FName IgnoreTagRoom2;
+	FName IgnoreTagRoom2 = "IgnoreRoom2";
 
 	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
-	FName IgnoreTagRoom3;
+	FName IgnoreTagRoom3 = "IgnoreRoom3";
 
 	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
-	FName IgnoreTagRoom4;
+	FName IgnoreTagRoom4 = "IgnoreRoom4";
 
 	UPROPERTY(EditAnywhere, Category = "Hidden Actors")
-	FName IgnoreTagRoom5;
+	FName IgnoreTagRoom5 = "IgnoreRoom5";
+
+	UPROPERTY(EditAnywhere, Category = "Lighting")
+	uint32 LightingLevelIndex;
 
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Portal Rendering")
@@ -90,12 +101,13 @@ private:
 	TArray<AActor*> Portals;
 
 	//Used here to be reusable
-	USceneCaptureComponent2D* SceneCaptureComponent;
 	
 	TArray<FName> Tags;
 
 	UPROPERTY(transient)
 	UTextureRenderTarget2D* PortalTexture;
+
+	APostProcessVolume* CurrentPostProcess;
 
 	float UpdateDelay;
 
