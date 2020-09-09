@@ -39,7 +39,7 @@ void ASoundManager::MuteSound(USoundClass* TargetSoundClass)
 	}
 }
 
-void ASoundManager::MuteAllSounds()
+void ASoundManager::MuteRegisteredSounds()
 {
 	for (const TPair<AActor*, USoundClass*>& Pair : PlayingActors)
 	{

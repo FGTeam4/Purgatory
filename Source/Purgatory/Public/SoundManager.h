@@ -24,9 +24,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-private:
+	FORCEINLINE bool GetIsMuted() { return bIsMuted; }
 
-public:
 	UFUNCTION(BlueprintCallable, Category = "Sound")
 	void SetSoundVolume(USoundClass* TargetSoundClass, float NewVolume);
 
@@ -37,12 +36,18 @@ public:
 
 	void UnMuteSound(USoundClass* TargetSoundClass);
 
-	/* Mutes the sound of all objects in the game*/ 
-	void MuteAllSounds();
+
+	/* Mutes the sound of all registered objects in the game*/ 
+	UFUNCTION(BlueprintCallable, Category = "Sound")
+	void MuteRegisteredSounds();
 
 	bool IsSoundPlaying(AActor* Actor, USoundClass* TargetSoundClass);
 
+public:
+
 private:
+
+	bool bIsMuted;
 
 	//Actors currently playing sounds.
 	TMap<AActor*, USoundClass*> PlayingActors;
