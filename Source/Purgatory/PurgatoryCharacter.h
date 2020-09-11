@@ -47,6 +47,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category=Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float LookSensitivity = 1.0f;
+
 protected:
 
 	/** Handles moving forward/backward */
@@ -66,6 +69,10 @@ protected:
 	 * @param Rate	This is a normalized rate, i.e. 1.0 means 100% of desired turn rate
 	 */
 	void LookUpAtRate(float Rate);
+
+	void AddControllerYawInput(float Val) override;
+
+	void AddControllerPitchInput(float Val) override;
 	
 protected:
 
