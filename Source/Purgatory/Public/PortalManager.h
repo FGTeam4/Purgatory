@@ -114,6 +114,9 @@ private:
 	UPROPERTY(EditAnywhere, Category = "Portal Rendering")
 	float RenderDistance = 5000.f;
 
+	UPROPERTY(EditAnywhere, Category = "Portal Rendering")
+	float PostProcessRenderDistance = 500.f;
+
 	UPROPERTY()
 	APlayerController* ControllerOwner;
 

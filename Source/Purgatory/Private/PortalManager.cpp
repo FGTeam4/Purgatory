@@ -77,7 +77,7 @@ void APortalManager::Init()
 	SceneCaptureComponent->RegisterComponent();
 
 	//Mostly post processing
-	SceneCaptureComponent->bCaptureEveryFrame = true;
+	SceneCaptureComponent->bCaptureEveryFrame= false;
 	SceneCaptureComponent->bCaptureOnMovement = false;
 	SceneCaptureComponent->LODDistanceFactor = 3;
 	SceneCaptureComponent->TextureTarget = nullptr;
@@ -90,44 +90,10 @@ void APortalManager::Init()
 	
 	SceneCaptureComponent->HiddenActors = HiddenObjects;
 
-	//TArray<ULevelStreaming*> Worlds;
-	//UWorld* LightingSubLevel = nullptr;
-	//
-	//Worlds = GetWorld()->GetStreamingLevels();
-	//
-	//for (int i = 0; i < Worlds.Num(); i++)
-	//{
-	//	if (Worlds[i]->GetName().Contains("Lighting"))
-	//	{
-	//		LightingSubLevel = Cast<UWorld>(Worlds[i]);
-	//	}
-	//}
-
-	//CurrentPostProcess = Cast<APostProcessVolume>(UGameplayStatics::GetActorOfClass(LightingSubLevel, APostProcessVolume::StaticClass()));
-
 	UCameraComponent* PlayerCam = nullptr;
 	PlayerCam = PlayerCharacter->GetCamera();
 
-	FPostProcessSettings CaptureSettings;
-
-	CaptureSettings.bOverride_AmbientOcclusionQuality = true;
-	CaptureSettings.bOverride_MotionBlurAmount = true;
-	CaptureSettings.bOverride_SceneFringeIntensity = true;
-	CaptureSettings.bOverride_GrainIntensity = true;
-	CaptureSettings.bOverride_ScreenSpaceReflectionQuality = true;
-
-	CaptureSettings.AmbientOcclusionQuality = 0.0f; //0=lowest quality..100=maximum quality
-	CaptureSettings.MotionBlurAmount = 0.0f; //0 = disabled
-	CaptureSettings.SceneFringeIntensity = 0.0f; //0 = disabled
-	CaptureSettings.GrainIntensity = 0.0f; //0 = disabled
-	CaptureSettings.ScreenSpaceReflectionQuality = 0.0f; //0 = disabled
-
-	CaptureSettings.bOverride_ScreenPercentage = true;
-	CaptureSettings.ScreenPercentage = 100.0f;
-
 	SetPostProcessMaterials();
-
-	//SceneCaptureComponent->PostProcessSettings = CaptureSettings;
 
 	//Create RTT Buffer
 	GeneratePortalTexture();
@@ -250,6 +216,11 @@ APortal* APortalManager::UpdatePortalsInTheWorld()
 		{
 			ActivePortal = Portal;
 			Distance = NewDistance;
+
+			if (NewDistance < PostProcessRenderDistance)
+			{
+				SceneCaptureComponent->bCaptureEveryFrame = true;
+			}
 		}
 	}
 
@@ -262,6 +233,7 @@ void APortalManager::RequestTeleport(APortal* Portal, ACharacter* Player)
 	{
 		if (!Player->GetMovementComponent()->IsFalling())
 		{
+			SceneCaptureComponent->bCaptureEveryFrame = false;
 			Portal->TeleportPlayer(Player);
 
 			APortal* FuturePortal = UpdatePortalsInTheWorld();
