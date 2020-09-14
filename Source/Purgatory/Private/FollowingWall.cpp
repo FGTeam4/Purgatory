@@ -5,19 +5,9 @@ AFollowingWall::AFollowingWall()
 {
 }
 
-void AFollowingWall::StartCheckDistanceTimer()
-{
-	GetWorld()->GetTimerManager().SetTimer(CheckDistanceTimerHandle, this, &AFollowingWall::CheckDistance, CheckDistanceInterval, true);
-}
-
-void AFollowingWall::StopCheckDistanceTimer()
-{
-	GetWorld()->GetTimerManager().ClearTimer(CheckDistanceTimerHandle);
-}
-
 void AFollowingWall::StartMoveActorTimer()
 {
-	GetWorld()->GetTimerManager().SetTimer(MoveActorTimerHandle, this, &AFollowingWall::MoveActor, MoveActorInterval, true);
+	GetWorld()->GetTimerManager().SetTimer(MoveActorTimerHandle, this, &AFollowingWall::MoveActor, MoveActorInterval * GetWorld()->GetDeltaSeconds(), true);
 }
 
 void AFollowingWall::StopMoveActorTimer()
@@ -40,35 +30,37 @@ void AFollowingWall::BeginPlay()
 		PlayerFacingStart.X = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.X);
 		PlayerFacingStart.Y = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Y);
 		PlayerFacingStart.Z = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Z);
+		SetActorLocation(PlayerCharacter->GetActorLocation() - PlayerFacingStart * DistanceToPlayer);
+		CalculateLocation();
 	}
-	StartCheckDistanceTimer();
 }
 
-void AFollowingWall::CheckDistance()
+bool AFollowingWall::CheckDistance()
 {
 	FVector ActorCurrentLocation = GetActorLocation();
 	FVector PlayerCurrentLocation = PlayerCharacter->GetActorLocation();
-	if (FVector::Distance(PlayerCurrentLocation, ActorCurrentLocation) < DistanceToPlayer)
+	FVector ClosestDistance = ActorCurrentLocation;
+	if (FVector::Distance(PlayerCurrentLocation, DistanceSecond->GetComponentLocation()) < FVector::Distance(PlayerCurrentLocation, ClosestDistance))
 	{
-		return;
+		ClosestDistance = DistanceSecond->GetComponentLocation();
 	}
-	if (FVector::Distance(PlayerCurrentLocation, DistanceFirst->GetComponentLocation()) < (DistanceToPlayer * 6.0f))
+	if (FVector::Distance(PlayerCurrentLocation, DistanceThird->GetComponentLocation()) < FVector::Distance(PlayerCurrentLocation, ClosestDistance))
 	{
-		return;
+		ClosestDistance = DistanceThird->GetComponentLocation();
 	}
-	if (FVector::Distance(PlayerCurrentLocation, DistanceSecond->GetComponentLocation()) < (DistanceToPlayer * 3.0f))
+	if (FVector::Distance(PlayerCurrentLocation, DistanceFirst->GetComponentLocation()) < FVector::Distance(PlayerCurrentLocation, ClosestDistance))
 	{
-		return;
+		ClosestDistance = DistanceFirst->GetComponentLocation();
 	}
-	if (FVector::Distance(PlayerCurrentLocation, DistanceThird->GetComponentLocation()) < (DistanceToPlayer * 3.0f))
+	if (FVector::Distance(PlayerCurrentLocation, DistanceFourth->GetComponentLocation()) < FVector::Distance(PlayerCurrentLocation, ClosestDistance))
 	{
-		return;
+		ClosestDistance = DistanceFourth->GetComponentLocation();
 	}
-	if (FVector::Distance(PlayerCurrentLocation, DistanceFourth->GetComponentLocation()) < (DistanceToPlayer * 6.0f))
+	if (FVector::Distance(PlayerCurrentLocation, ClosestDistance) <= DistanceToPlayer)
 	{
-		return;
+		return false;
 	}
-	CalculateLocation();
+	return true;
 }
 
 void AFollowingWall::CalculateLocation()
@@ -98,25 +90,22 @@ void AFollowingWall::MoveActor()
 	{
 		SetActorLocation(FVector(PlayerCharacter->GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
 	}
-	if (++CurrentMoveStep <= MoveSpeed)
+	if (++CurrentMoveStep < MoveSpeed)
 	{
-		FVector TempVector = ActorLocation + MoveVector * MoveAmount * CurrentMoveStep;
-		TempVector.Z = CurrentPlayerLocation.Z;
-		if (!SetActorLocation(TempVector, true))
+		FVector VectorLocation = ActorLocation + MoveVector * MoveAmount * CurrentMoveStep;
+		VectorLocation.Z = CurrentPlayerLocation.Z;
+		if (SetActorLocation(VectorLocation, true))
 		{
-			StopMoveActorTimer();
-			StartCheckDistanceTimer();
+			CurrentMoveStep = MoveSpeed;
 		}
-		if (FVector::Distance(GetActorLocation(), PlayerCharacter->GetActorLocation()) <= DistanceToPlayer)
+		if (CheckDistance())
 		{
-			StopMoveActorTimer();
-			StartCheckDistanceTimer();
+			CalculateLocation();
 		}
 	}
-	else
+	else if(CheckDistance())
 	{
-		StopMoveActorTimer();
-		StartCheckDistanceTimer();
+		CalculateLocation();
 	}
 }
 
@@ -124,11 +113,12 @@ void AFollowingWall::ResetWall(FVector PlayerSpawnLocation)
 {
 	StopMoveActorTimer();
 	SetActorLocation(PlayerSpawnLocation - PlayerFacingStart * DistanceToPlayer);
-	StartCheckDistanceTimer();
+	StartMoveActorTimer();
 }
 
 void AFollowingWall::SetYawRotation(float Degrees)
 {
+	StopMoveActorTimer();
 	FRotator NewRotation = FRotator(0.0f, Degrees, 0.0f);
 	if (Degrees == 0.0f)
 	{
@@ -147,4 +137,5 @@ void AFollowingWall::SetYawRotation(float Degrees)
 		PlayerFacingStart.Set(1.0f, 0.0f, 0.0f);
 	}
 	SetActorRotation(NewRotation);
+	StartMoveActorTimer();
 }
