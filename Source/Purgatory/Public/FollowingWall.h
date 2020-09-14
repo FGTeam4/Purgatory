@@ -33,6 +33,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void StartMoveActorTimer();
 
+	/**
+	* Stops the MoveActor timer
+	*/
+	UFUNCTION(BlueprintCallable)
+	void StopMoveActorTimer();
+
 public:
 
 	/**
@@ -77,11 +83,6 @@ private:
 	* Move the Wall towards the Player
 	*/
 	void MoveActor();
-
-	/**
-	* Stops the MoveActor timer
-	*/
-	void StopMoveActorTimer();
 
 private:
 
