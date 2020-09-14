@@ -23,7 +23,7 @@ public:
 
 public:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "500"))
 	float DistanceToPlayer = 300.0f;
 
 	UPROPERTY(EditAnywhere)
@@ -37,12 +37,6 @@ public:
 	*/
 	UPROPERTY(EditAnywhere)
 	float MoveActorInterval = 0.01f;
-
-	/**
-	* Time interval between checking distance to player
-	*/
-	UPROPERTY(EditAnywhere)
-	float CheckDistanceInterval = 0.1f;
 
 	UPROPERTY(EditAnywhere)
 	ACharacter* PlayerCharacter;
@@ -68,7 +62,7 @@ private:
 	/**
 	* Check distance between this Wall and the Player
 	*/
-	void CheckDistance();
+	bool CheckDistance();
 
 	/**
 	* Move the Wall towards the Player
@@ -81,16 +75,6 @@ private:
 	void CalculateLocation();
 
 	/**
-	* Starts the CheckDistance timer
-	*/
-	void StartCheckDistanceTimer();
-
-	/**
-	* Stops the CheckDistance timer
-	*/
-	void StopCheckDistanceTimer();
-
-	/**
 	* Starts the MoveActor timer
 	*/
 	void StartMoveActorTimer();
@@ -101,11 +85,6 @@ private:
 	void StopMoveActorTimer();
 
 private:
-
-	/**
-	* Handle for CheckDistance Timer
-	*/
-	FTimerHandle CheckDistanceTimerHandle;
 
 	/**
 	* Timer Handle for Move Timer
