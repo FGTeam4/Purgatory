@@ -21,24 +21,37 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetYawRotation(float Degrees);
 
-public:
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "0", ClampMax = "500"))
-	float DistanceToPlayer = 300.0f;
-
-	UPROPERTY(EditAnywhere)
-	float MoveAmount = 0.01f;
-
-	UPROPERTY(EditAnywhere)
-	int MoveSpeed = 100;
+	/**
+	* Calculate where to move Wall
+	*/
+	UFUNCTION(BlueprintCallable)
+	void CalculateLocation();
 
 	/**
-	* Time interval between movement changes
+	* Starts the MoveActor timer
 	*/
-	UPROPERTY(EditAnywhere)
+	UFUNCTION(BlueprintCallable)
+	void StartMoveActorTimer();
+
+public:
+
+	/**
+	* The distance the Following Wall shall keep to the player.
+	*/
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "200", ClampMax = "1000"))
+	float DistanceToPlayer = 500.0f;
+
+	/**
+	* Time interval between movement changes. 
+	* Higher interval means slower wall movement.
+	*/
+	UPROPERTY(EditAnywhere, meta = (ClampMin = "0.00001", ClampMax = "1"))
 	float MoveActorInterval = 0.01f;
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector PlayerFacingStart;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	ACharacter* PlayerCharacter;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -53,10 +66,6 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* DistanceFourth;
 
-protected:
-
-	virtual void BeginPlay() override;
-
 private:
 
 	/**
@@ -68,16 +77,6 @@ private:
 	* Move the Wall towards the Player
 	*/
 	void MoveActor();
-
-	/**
-	* Calculate where to move Wall
-	*/
-	void CalculateLocation();
-
-	/**
-	* Starts the MoveActor timer
-	*/
-	void StartMoveActorTimer();
 
 	/**
 	* Stops the MoveActor timer
@@ -95,13 +94,16 @@ private:
 	FVector MoveVector;
 
 	UPROPERTY()
-	FVector PlayerFacingStart;
-
-	UPROPERTY()
 	FVector ActorLocation;
 
 	UPROPERTY()
 	FVector CurrentPlayerLocation;
+
+	UPROPERTY()
+	float MoveAmount = 0.01f;
+
+	UPROPERTY()
+	int MoveSpeed = 100;
 
 	UPROPERTY()
 	int CurrentMoveStep = 0;

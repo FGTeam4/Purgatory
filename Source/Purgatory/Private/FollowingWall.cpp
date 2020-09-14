@@ -16,25 +16,6 @@ void AFollowingWall::StopMoveActorTimer()
 	GetWorld()->GetTimerManager().ClearTimer(MoveActorTimerHandle);
 }
 
-void AFollowingWall::BeginPlay()
-{
-	Super::BeginPlay();
-
-	if (PlayerCharacter == nullptr)
-	{
-		PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	}
-	if (PlayerCharacter != nullptr)
-	{
-		PlayerFacingStart = PlayerCharacter->GetActorForwardVector();
-		PlayerFacingStart.X = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.X);
-		PlayerFacingStart.Y = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Y);
-		PlayerFacingStart.Z = FGenericPlatformMath::RoundToFloat(PlayerFacingStart.Z);
-		SetActorLocation(PlayerCharacter->GetActorLocation() - PlayerFacingStart * DistanceToPlayer);
-		CalculateLocation();
-	}
-}
-
 bool AFollowingWall::CheckDistance()
 {
 	FVector ActorCurrentLocation = GetActorLocation();
@@ -65,7 +46,6 @@ bool AFollowingWall::CheckDistance()
 
 void AFollowingWall::CalculateLocation()
 {
-	StopMoveActorTimer();
 	ActorLocation = GetActorLocation();
 	CurrentPlayerLocation = PlayerCharacter->GetActorLocation();
 	MoveVector.Z = 0.0f;
@@ -77,19 +57,10 @@ void AFollowingWall::CalculateLocation()
 	{
 		MoveVector *= -1;
 	}
-	StartMoveActorTimer();
 }
 
 void AFollowingWall::MoveActor()
 {
-	if (PlayerFacingStart.X != 0.0f)
-	{
-		SetActorLocation(FVector(GetActorLocation().X, PlayerCharacter->GetActorLocation().Y, GetActorLocation().Z));
-	}
-	else if (PlayerFacingStart.Y != 0.0f)
-	{
-		SetActorLocation(FVector(PlayerCharacter->GetActorLocation().X, GetActorLocation().Y, GetActorLocation().Z));
-	}
 	if (++CurrentMoveStep < MoveSpeed)
 	{
 		FVector VectorLocation = ActorLocation + MoveVector * MoveAmount * CurrentMoveStep;
@@ -100,19 +71,23 @@ void AFollowingWall::MoveActor()
 		}
 		if (CheckDistance())
 		{
+			StopMoveActorTimer();
 			CalculateLocation();
+			StartMoveActorTimer();
 		}
 	}
-	else if(CheckDistance())
+	if (CheckDistance())
 	{
+		StopMoveActorTimer();
 		CalculateLocation();
+		StartMoveActorTimer();
 	}
 }
 
 void AFollowingWall::ResetWall(FVector PlayerSpawnLocation)
 {
 	StopMoveActorTimer();
-	SetActorLocation(PlayerSpawnLocation - PlayerFacingStart * DistanceToPlayer);
+	SetActorLocation(PlayerSpawnLocation - PlayerFacingStart * DistanceToPlayer * 4.0f);
 	StartMoveActorTimer();
 }
 
