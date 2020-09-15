@@ -16,6 +16,17 @@ void AFollowingWall::StopMoveActorTimer()
 	GetWorld()->GetTimerManager().ClearTimer(MoveActorTimerHandle);
 }
 
+void AFollowingWall::BeginPlay()
+{
+	Super::BeginPlay();
+
+	PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	PlayerFacingCurrent = PlayerCharacter->GetActorForwardVector();
+	StartPosition = GetActorLocation();
+	CalculateLocation();
+	StartMoveActorTimer();
+}
+
 bool AFollowingWall::CheckDistance()
 {
 	FVector ActorCurrentLocation = GetActorLocation();
@@ -51,9 +62,9 @@ void AFollowingWall::CalculateLocation()
 	MoveVector.Z = 0.0f;
 	MoveVector.X = ActorLocation.X;
 	MoveVector.Y = ActorLocation.Y;
-	MoveVector = (CurrentPlayerLocation - MoveVector) * PlayerFacingStart;
+	MoveVector = (CurrentPlayerLocation - MoveVector) * PlayerFacingCurrent;
 	MoveVector.Z = 0.0f;
-	if (PlayerFacingStart.X < 0.0f || PlayerFacingStart.Y < 0.0f)
+	if (PlayerFacingCurrent.X < 0.0f || PlayerFacingCurrent.Y < 0.0f)
 	{
 		MoveVector *= -1;
 	}
@@ -61,13 +72,13 @@ void AFollowingWall::CalculateLocation()
 
 void AFollowingWall::MoveActor()
 {
-	if (++CurrentMoveStep < MoveSpeed)
+	if (++CurrentMoveStep < MaxMoveStep)
 	{
 		FVector VectorLocation = ActorLocation + MoveVector * MoveAmount * CurrentMoveStep;
 		VectorLocation.Z = CurrentPlayerLocation.Z;
 		if (SetActorLocation(VectorLocation, true))
 		{
-			CurrentMoveStep = MoveSpeed;
+			CurrentMoveStep = MaxMoveStep;
 		}
 		if (CheckDistance())
 		{
@@ -87,7 +98,16 @@ void AFollowingWall::MoveActor()
 void AFollowingWall::ResetWall(FVector PlayerSpawnLocation)
 {
 	StopMoveActorTimer();
-	SetActorLocation(PlayerSpawnLocation - PlayerFacingStart * DistanceToPlayer * 4.0f);
+	SetActorLocation(PlayerSpawnLocation - PlayerFacingCurrent * DistanceToPlayer * RestartOffsetMultiplier);
+	StartMoveActorTimer();
+}
+
+void AFollowingWall::ResetWallOnRestart()
+{
+	StopMoveActorTimer();
+	PlayerFacingCurrent = PlayerFacingStart;
+	SetActorRotation(FRotator(0.0f, StartingRotation, 0.0f));
+	SetActorLocation(FVector(PlayerCharacter->GetActorLocation().X, StartPosition.Y, StartPosition.Z) - PlayerFacingCurrent * DistanceToPlayer * RestartOffsetMultiplier);
 	StartMoveActorTimer();
 }
 
@@ -97,19 +117,19 @@ void AFollowingWall::SetYawRotation(float Degrees)
 	FRotator NewRotation = FRotator(0.0f, Degrees, 0.0f);
 	if (Degrees == 0.0f)
 	{
-		PlayerFacingStart.Set(0.0f, 1.0f, 0.0f);
+		PlayerFacingCurrent.Set(0.0f, 1.0f, 0.0f);
 	}
 	else if (Degrees == 90.0f || Degrees == -270.0f)
 	{
-		PlayerFacingStart.Set(-1.0f, 0.0f, 0.0f);
+		PlayerFacingCurrent.Set(-1.0f, 0.0f, 0.0f);
 	}
 	else if (Degrees == 180.0f || Degrees == -180.0f)
 	{
-		PlayerFacingStart.Set(0.0f, -1.0f, 0.0f);
+		PlayerFacingCurrent.Set(0.0f, -1.0f, 0.0f);
 	}
 	else if (Degrees == 270.0f || Degrees == -90.0f)
 	{
-		PlayerFacingStart.Set(1.0f, 0.0f, 0.0f);
+		PlayerFacingCurrent.Set(1.0f, 0.0f, 0.0f);
 	}
 	SetActorRotation(NewRotation);
 	StartMoveActorTimer();

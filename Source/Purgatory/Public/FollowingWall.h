@@ -19,32 +19,17 @@ public:
 	void ResetWall(FVector PlayerSpawnLocation);
 
 	UFUNCTION(BlueprintCallable)
+	void ResetWallOnRestart();
+
+	UFUNCTION(BlueprintCallable)
 	void SetYawRotation(float Degrees);
-
-	/**
-	* Calculate where to move Wall
-	*/
-	UFUNCTION(BlueprintCallable)
-	void CalculateLocation();
-
-	/**
-	* Starts the MoveActor timer
-	*/
-	UFUNCTION(BlueprintCallable)
-	void StartMoveActorTimer();
-
-	/**
-	* Stops the MoveActor timer
-	*/
-	UFUNCTION(BlueprintCallable)
-	void StopMoveActorTimer();
 
 public:
 
 	/**
 	* The distance the Following Wall shall keep to the player.
 	*/
-	UPROPERTY(EditAnywhere, meta = (ClampMin = "200", ClampMax = "1000"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (ClampMin = "200", ClampMax = "1000"))
 	float DistanceToPlayer = 500.0f;
 
 	/**
@@ -55,10 +40,13 @@ public:
 	float MoveActorInterval = 0.01f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector PlayerFacingStart;
+	float StartingRotation = -90.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	ACharacter* PlayerCharacter;
+	float RestartOffsetMultiplier = 500.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FVector PlayerFacingStart = FVector(1.0f, 0.0f, 0.0f);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* DistanceFirst;
@@ -72,7 +60,26 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	UStaticMeshComponent* DistanceFourth;
 
+protected:
+
+	virtual void BeginPlay() override;
+
 private:
+
+	/**
+	* Calculate where to move Wall
+	*/
+	void CalculateLocation();
+
+	/**
+	* Starts the MoveActor timer
+	*/
+	void StartMoveActorTimer();
+
+	/**
+	* Stops the MoveActor timer
+	*/
+	void StopMoveActorTimer();
 
 	/**
 	* Check distance between this Wall and the Player
@@ -85,6 +92,9 @@ private:
 	void MoveActor();
 
 private:
+
+	UPROPERTY()
+	ACharacter* PlayerCharacter;
 
 	/**
 	* Timer Handle for Move Timer
@@ -101,10 +111,16 @@ private:
 	FVector CurrentPlayerLocation;
 
 	UPROPERTY()
+	FVector StartPosition;
+
+	UPROPERTY()
+	FVector PlayerFacingCurrent;
+
+	UPROPERTY()
 	float MoveAmount = 0.01f;
 
 	UPROPERTY()
-	int MoveSpeed = 100;
+	int MaxMoveStep = 100;
 
 	UPROPERTY()
 	int CurrentMoveStep = 0;
