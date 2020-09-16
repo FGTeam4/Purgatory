@@ -24,6 +24,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetYawRotation(float Degrees);
 
+	/**
+	* Stops the MoveActor timer
+	*/
+	UFUNCTION(BlueprintCallable)
+	void StopMoveActorTimer();
+
 public:
 
 	/**
@@ -75,11 +81,6 @@ private:
 	* Starts the MoveActor timer
 	*/
 	void StartMoveActorTimer();
-
-	/**
-	* Stops the MoveActor timer
-	*/
-	void StopMoveActorTimer();
 
 	/**
 	* Check distance between this Wall and the Player
