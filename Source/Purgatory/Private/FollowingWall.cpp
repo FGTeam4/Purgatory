@@ -19,12 +19,17 @@ void AFollowingWall::StopMoveActorTimer()
 void AFollowingWall::BeginPlay()
 {
 	Super::BeginPlay();
-
-	PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
-	PlayerFacingCurrent = PlayerCharacter->GetActorForwardVector();
-	StartPosition = GetActorLocation();
-	CalculateLocation();
-	StartMoveActorTimer();
+	if (PlayerCharacter == nullptr)
+	{
+		PlayerCharacter = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	}
+	if (PlayerCharacter != nullptr)
+	{
+		PlayerFacingCurrent = PlayerCharacter->GetActorForwardVector();
+		StartPosition = GetActorLocation();
+		CalculateLocation();
+		StartMoveActorTimer();
+	}
 }
 
 bool AFollowingWall::CheckDistance()
