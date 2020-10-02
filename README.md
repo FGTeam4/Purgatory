@@ -1,5 +1,5 @@
 # Seventh Circle (working name Purgatory)
-Seventh Circle is a first-person puzzle solver set in a 1950's film noir surreal setting.
+Seventh Circle is a first-person puzzle game set in a 1950's film noir surreal setting.
 
 Lars is stuck in his personal hell, forced to re-live his worst nightmare over and over, until he collects his scattered memories to piece together the moment that got him into hell.
 
