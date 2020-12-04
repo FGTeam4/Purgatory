@@ -6,3 +6,23 @@ Lars is stuck in his personal hell, forced to re-live his worst nightmare over a
 Seventh Circle was developed in Unreal Engine 4 in four weeks as a part of a game project at Futuregames, a higher vocational education for game development, in Stockholm, Sweden.
 
 Download game: https://fredrikhanses.itch.io/seventh-circle
+
+Credits:
+
+Tech:
+
+    Fredrik Hanses
+    Erik Pettersson
+    Yunis Al-Breihi
+    
+Design:
+
+    Ellen Ahlin
+    Alexander Johansson
+    Benjamin Pantzar
+    
+Art:
+
+    Richard Berglund
+    Abenthy Lillieström
+    Petronella Olanders
